@@ -8,7 +8,7 @@
       "type": "extendscript-debug",
       "request": "launch",
       "name": "Joxer",
-      "program": "${workspaceFolder}/Silver Bullet code.jsx",
+      "program": "${workspaceFolder}/Joxer local.jsx",
       "stopOnEntry": false
     }
   ]
