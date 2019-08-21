@@ -2,259 +2,19 @@
 // Silver Bullet code file originated Sept 2017
 // Major restructure: August 2019
 
-// MAKE DEFAULT METADATA OBJECT
-// Called from getMetadata, returns an object with default values
-// (in case anything is missing from an incoming SVG element's metadata)
-function makeDefaultMetadataObject(isText) {
-	var metaObj = {
-		name: 'No name found',
-		note: '',
-		// NOTE: that failsafe colours are strings here... I think!!
-		// fill: 'c_failsafeColour',
-		// stroke: 'c_failsafeColour',
-	}
-	// If text, append additional props
-	if (isText) {
-		metaObj.justification = 'start';
-		metaObj.font = c_failsafeFont;
-		metaObj.size = 8;
-		metaObj.leading = 9;
-		metaObj.contents = '';
-	}
-	return metaObj;
-}
-// MAKE DEFAULT METADATA OBJECT ends
-
-// GET METADATA
-// Passed an elemen's id, separates out the actual name from
-// the SVG metadata, and returns an object containing all properties
-function getMetadata(id, isText) {
-	// I think I need a default object, with all properties...
-	var myObj = makeDefaultMetadataObject(isText);
-	if (id.search(c_metaDataSep) > -1) {
-		// Separate element name and id
-		firstSplit = id.split(c_metaDataSep);
-		myObj.name = firstSplit[0];
-		// If there's metadata, process it...
-		var props = firstSplit[1];
-		if (props.length > 0) {
-			// Split svg metadata into individual properties
-			// Anything can have fill and/or
-			// stroke; text can also have justification and original xpos
-			var mArray = props.split(c_metaItemSep);
-			for (i = 0; i < mArray.length; i++) {
-				var oneProp = mArray[i];
-				// oneProp is a string: property:value
-				// So split (again!) and triage
-				var pArray = oneProp.split(c_metaPropSep);
-				// This is a property name:value pair
-				var prop = myTrim(pArray[0]);
-				var val = myTrim(pArray[1]);
-				myObj[prop] = val;
-			}
-		}
-	} else {
-			// No metadata; return name
-			myObj.name = id;
-	}
-	return myObj;
-}
-// GET METADATA ends
-
-// MAKE CMYK COLOUR OBJECT
-// Utility: looks up a colour name and returns a CMYK colour object
-function makeCmykColourObject(cName) {
-    var myCol = new CMYKColor();
-    var def = c_colourLookup[cName];
-		if (typeof def === 'undefined') {
-			def = c_failsafeColour;
-		}
-    myCol.black = def.k;
-    myCol.cyan = def.c;
-    myCol.magenta = def.m;
-    myCol.yellow = def.y;
-    return myCol;
-}
-// MAKE CMYK COLOUR OBJECT ends
-
-// MAKE RGB COLOUR OBJECT
-// Utility: looks up a colour name and returns a RGB colour object
-function makeRgbColourObject(cName) {
-    var myCol = new RGBColor();
-    var def = c_layerColourLookup[cName];
-		if (typeof def === 'undefined') {
-			def = c_failsafeRgbColour;
-		}
-    myCol.red = def.r;
-    myCol.green = def.g;
-    myCol.blue = def.b;
-    return myCol;
-}
-// MAKE RGB COLOUR OBJECT ends
-
-// ***** INDIVIDUAL ATTRIBUTE SETTERS *****
-
-// FILL ELEMENT
-// Args are the element and the name of the colour
-function fillElement(myE, cName) {
-  var myCol = makeCmykColourObject(cName);
-  var overprint = c_textOverprint.search(cName) >= 0;
-  if (myE.typename == 'PathItem') {
-    myE.fillColor = myCol;
-        myE.overprintFill = overprint;
-  } else if (myE.typename == 'TextFrame') {
-        myE.textRange.characterAttributes.fillColor = myCol;
-        myE.overprintFill = overprint;
-  } else {
-    alert('Sorry, failed to fill object ' + myE.name + ' with ' + cName);
-  }
-}
-// FILL ELEMENT ends
-
-// STROKE ELEMENT
-// Args are the element and the name of the colour
-// Also does overprinting
-function strokeElement(myE, cName) {
-  var myCol = makeCmykColourObject(cName);
-  if (myE.typename == 'PathItem') {
-    myE.strokeColor = myCol;
-        var overprint = c_textOverprint.search(cName) >= 0;
-        myE.strokeOverprint = overprint;
-  } else {
-    alert('Object ' + myE.name + ' is not a pathItem, so cannot apply colour ' + cName);
-  }
-}
-// STROKE ELEMENT ends
-
-// ********** PATH CONVERSIONS
-
-// SET PATH ATTRIBUTES
-// Called from recolourGroup to recolour a single path element
-function setPathAttributes(myE) {
-	// Function returns an object with simple element name and other
-	// optional svg-related properties
-	// Is there a name?
-	var id = myTrim(myE.name);
-	if (id.length < 1) {
-		return;
-	}
-	// Still here? Get path metadata props
-	var eProps = getMetadata(myE.name, false);
-	for (var pName in eProps) {
-		if (eProps.hasOwnProperty(pName)) {
-			var val = eProps[pName];
-			switch (pName) {
-				case 'name':
-					myE.name = val;
-					break;
-				case 'note':
-					myE.note = val;
-					break;
-				case 'fill':
-					fillElement(myE, val);
-					break;
-				case 'stroke':
-					strokeElement(myE, val);
-					break;
-			}
+// KILL EMPTY GROUPS IN LAYER
+// Called from processSibyl to do final check through
+// all layers, deleting empty groups
+function killEmptyGroupsInLayer(theLayer) {
+	var gCount = theLayer.groupItems.length;
+	for (var gNo = gCount - 1; gNo >= 0; gNo--) {
+		var thisGroup = theLayer.groupItems[gNo];
+		if (thisGroup.pageItems.length === 0) {
+			thisGroup.remove();
 		}
 	}
 }
-// SET PATH ATTRIBUTES ends
-
-// RESET ALL PATH ATTRIBUTES
-function resetAllPathAttributes(grp) {
-	var pathCount = grp.pathItems.length;
-	// If I just loop on the paths and reset attributes, Illy scrambles them.
-	// So get array of original IDs...
-	var pArray = [];
-	for (var i = 0; i < pathCount; i++) {
-		pArray.push(grp.pathItems[i].name);
-	}
-	// Then loop on original IDs
-	for (var j = 0; j < pArray.length; j++) {
-		var onePath = grp.pathItems[pArray[j]];
-		setPathAttributes(onePath);
-	}
-	return true;
-}
-
-// RESET ALL PATH ATTRIBUTES ends
-
-
-// ********** PATH CONVERSIONS end
-
-
-
-// DELETE MARKED GROUP
-function deleteMarkedGroups(grps) {
-  var len = grps.length - 1;
-	for (var i = len; i >= 0; i--) {
-    var g = grps[i];
-		if (g.name === c_deleteme) {
-      g.remove();
-		}
-	}
-}
-// DELETE MARKED GROUP ends
-
-// REMOVE ORIGINAL GROUP
-// Called from rationaliseText. Deletes all elements in a group
-// Possible duplicate of deleteMarkedGroups; and probably better!
-// So FIXME:
-function removeOriginalGrp(grp) {
-    var len = grp.pageItems.length - 1;
-	for (var i = len; i >= 0; i--) {
-		var item = grp.pageItems[i];
-		item.remove();
-	}
-}
-// REMOVE ORIGINAL GROUP ends
-
-// MAKE NEW TEXT FRAME
-// Called from rationaliseText and processBlobPair
-// Collects properties from a text frame, then calls makeText
-// to create a new text element. In each case, the caller
-// removes the original
-function makeNewTextFrame(oFrame, newGroup) {
-	var anchorX = oFrame.anchor[0];
-    var anchorY = oFrame.anchor[1];
-	// Extract the metadata constituent
-	var tProps = getMetadata(oFrame.name, true);
-	// Now work out xPos from width and justification
-	var width = parseFloat(tProps.width);
-	var just = tProps.justification;
-	if (just === 'middle' || just === 'center') {
-		anchorX += width / 2;
-	} else if (just === 'end') {
-		anchorX += width;
-	}
-    var contents = oFrame.contents;
-    var contentsArray = [{
-        contents: contents,
-        textFont: oFrame.textRange.characterAttributes.textFont,
-        newline: false
-    }];
-    // Extract properties from original frame
-    var textProps = {
-        context: oFrame.parent,
-        anchor: [anchorX, anchorY],
-        fill: makeCmykColourObject(tProps.fill),
-        font: oFrame.textRange.characterAttributes.textFont,
-        size: oFrame.textRange.characters[0].size,
-        tracking: oFrame.textRange.characterAttributes.tracking,
-        leading: parseFloat(tProps.leading),
-        justification:  just,
-        name: tProps.name,
-        contents: contents,
-        contentsArray: contentsArray
-    };
-    var newText = makeText(textProps);
-    newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
-}
-// MAKE NEW TEXT FRAME ends
-
-// ********** TEXT CONVERSION FUNCTIONS END
+// KILL EMPTY GROUPS IN LAYER ends
 
 function movePanelHeaders(fromGrp, toLayer) {
   var itemCount = fromGrp.pageItems.length;
@@ -268,6 +28,7 @@ function movePanelHeaders(fromGrp, toLayer) {
     }
   }
 }
+
 
 function newContentLayer(parent, counter) {
   var layerName = c_myContentLayer;
@@ -409,7 +170,7 @@ function restructureDoc(myDoc) {
 		return false;
 	}
   // Create background layer
-	var backLayer = myDoc.layers.add();
+  var backLayer = myDoc.layers.add();
   backLayer.name = c_myBackLayer;
   var layerColour = makeRgbColourObject(c_myBackLayer);
   backLayer.color = layerColour;
@@ -453,7 +214,33 @@ function processSibyl(myDoc) {
 	if (!processContentGroups(myDoc)) {
 		alert("Failed to process main group of chart-specific content...");
 		return false;
-	}	
+	}
+
+	// Finally, kill the original default SVG layer
+	// No: done in loop below
+	// try {
+	// 	myDoc.layers[c_itsLayer1].remove();
+	// }
+	// catch (e) {}
+
+	// Layer tidying
+	var lCount = myDoc.layers.length;
+	for (var lNo = lCount - 1; lNo >= 0; lNo--) {
+		var theLayer = myDoc.layers[lNo];
+		if (theLayer.name === c_itsLayer1) {
+			// Kill original SVG default layer
+			theLayer.remove();
+		} else {	
+			// Kill any empty groups in surviving layers. Actually,
+			// this is a bit weird. It looks to me as though Illy
+			// auto-removes empty groups... but not necessarily
+			// in time before I finish processing and save the
+			// file out. So kill anything we can still find...
+			killEmptyGroupsInLayer(theLayer);
+		}
+	}
+
+
 	return true;
 }
 // PROCESS SIBYL ends
@@ -558,11 +345,10 @@ function importSibyl() {
     // Now call main processing controller:
     processedSuccessfully = processSibyl(svgDoc);
   }
-  // NOTE: stopping here for now
-  return;
-  if (processedSuccessfully) {
+
+	if (processedSuccessfully) {
     // Save if successful
-    saveAsEPS(myDoc);
+    saveAsEPS(svgDoc);
   } else {
     // Failed: 
     msg = 'Processing failed. If this re-occurs, call ' + c_contactNotice;

@@ -47,6 +47,43 @@ function doProportionalText(tRange, isTitle) {
 }
 // DO PROPORTIONAL TEXT ends
 
+// LABELS ARE ALL NUMBERS
+// Called from setTabularLining to check whether all
+// textFrames in an axis-label group are numbers
+function labelsAreAllNumbers(group) {
+	var allNumbers = true;
+	var tCount = group.textFrames.length;
+	for (var tNo = 0; tNo < tCount; tNo++) {
+		var thisFrame = group.textFrames[tNo];
+		// Exclude any header
+		if (thisFrame.name.search('header') < 0) {
+			if (isNaN(thisFrame.contents)) {
+				allNumbers = false;
+				break;
+			}
+		}
+	}
+	return allNumbers;
+}
+// LABELS ARE ALL NUMBERS ends
+
+// SET TABULAR LINING
+// Called from processAxisGroup. Argument is a group
+// of label text-frames. If the labels are all numeric,
+// set tabular lining
+function setTabularLining(group) {
+	if (labelsAreAllNumbers(group)) {
+		var tCount = group.textFrames.length;
+		for (var tNo = 0; tNo < tCount; tNo++) {
+			var tFrame = group.textFrames[tNo];
+			if (tFrame.name.search('header') < 0) {
+				tFrame.textRange.characterAttributes.figureStyle = FigureStyleType.TABULAR;
+			}
+		}	
+	}
+}
+// SET TABULAR LINING ends
+
 // MAKE TEXT
 // Major utility: passed a text object definition, creates it with all attributes
 function makeText(tObj) {
@@ -269,6 +306,49 @@ function isTextGroup(grp) {
 }
 // IS TEXT GROUP ends
 
+// MAKE NEW TEXT FRAME
+// Called from rationaliseText and processBlobPair
+// Collects properties from a text frame, then calls makeText
+// to create a new text element. In each case, the caller
+// removes the original
+function makeNewTextFrame(oFrame, newGroup) {
+	var anchorX = oFrame.anchor[0];
+    var anchorY = oFrame.anchor[1];
+	// Extract the metadata constituent
+	var tProps = getMetadata(oFrame.name, true);
+	// Now work out xPos from width and justification
+	var width = parseFloat(tProps.width);
+	var just = tProps.justification;
+	if (just === 'middle' || just === 'center') {
+		anchorX += width / 2;
+	} else if (just === 'end') {
+		anchorX += width;
+	}
+    var contents = oFrame.contents;
+    var contentsArray = [{
+        contents: contents,
+        textFont: oFrame.textRange.characterAttributes.textFont,
+        newline: false
+    }];
+    // Extract properties from original frame
+    var textProps = {
+        context: oFrame.parent,
+        anchor: [anchorX, anchorY],
+        fill: makeCmykColourObject(tProps.fill),
+        font: oFrame.textRange.characterAttributes.textFont,
+        size: oFrame.textRange.characters[0].size,
+        tracking: oFrame.textRange.characterAttributes.tracking,
+        leading: parseFloat(tProps.leading),
+        justification:  just,
+        name: tProps.name,
+        contents: contents,
+        contentsArray: contentsArray
+    };
+    var newText = makeText(textProps);
+    newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
+}
+// MAKE NEW TEXT FRAME ends
+
 
 
 // RATIONALISE TEXT
@@ -276,6 +356,7 @@ function isTextGroup(grp) {
 // Arg 1 is a groupItem: a strings group;
 // Arg 2 is a flag: use the group's name to set attributes on child textFrames
 function rationaliseText(grp, useGroupName) {
+	var returnedGroup;
   var gLen = grp.groupItems.length;
   var tLen = grp.textFrames.length;
 	// This may be over-optimistic... but...
@@ -302,6 +383,7 @@ function rationaliseText(grp, useGroupName) {
     // FIXME: I think I can remove this and move call to
     // removeOriginalGrp out of the loop, below 
 		deleteMarkedGroups(grp.groupItems, true);
+		returnedGroup = grp;
 	} else if (tLen > 0) {
         // So the argument was a single group of textFrames. These can, however, have
         // originally been tspans to be assembled into a single textFrame...
@@ -328,10 +410,11 @@ function rationaliseText(grp, useGroupName) {
                 // Create a duplicate (original deleted below)
                 makeNewTextFrame(tFrame, newGroup);
             }
-        }
+				}
+				returnedGroup = newGroup;
         removeOriginalGrp(grp);
 	}
     
-  return true;
+  return returnedGroup;
 }
 // RATIONALISE TEXT ends

@@ -78,7 +78,13 @@ var c_itsBackGroup = 'background-group';
 var c_itsPanelsGroup  = 'panels-group';
 var c_itsContentGroup = 'content-group';
 var c_itsLegendsGroup = 'legends-group';
-var c_itsAllLineSeriesGroup = 'all-line-series-outer-group';
+var c_itsAllLineSeriesOuterGroup = 'all-line-series-outer-group';
+var c_itsBlobGroup = 'blob-group-';
+var c_itsBlobHeaderGroup = 'blob-header-group-';
+var c_itsZeroLineGroup = 'zeroline-group-';
+var c_itsSecondaryGroup = 'axis-secondary-group-'
+var c_itsAxisHeaderGroup = 'axis-header-group-';
+var c_zeroLine = 'axis-zero-line';
 // 'my' are elements that I create in processing
 /*
   Under the restructure I want only
@@ -110,7 +116,7 @@ var c_left = '-left';
 var c_right = '-right';
 // Axes
 var c_myXaxisGroup = 'xaxis-group-'
-var c_mySecondaryGroup = '-axis-secondary-group-'
+var c_myYaxisGroup = 'yaxis-group-'
 var c_myTicksGroup = 'axis-ticks-group-';
 var c_myLabelsGroup = 'axis-labels-group-';
 // Legends:
@@ -119,19 +125,26 @@ var c_myLegendPair = 'legend-';
 var c_myLegendText = 'legend-text';
 var c_myLegendKey = 'legend-key';
 var c_myLegendHeader = 'legend-header';
-// Zeroline element
-var c_zeroLine = 'axis-zero-line';
+// 
+var c_myLinePointSeries = 'point-lines-group';
+var c_myScatterPoint = 'scatter-point';
+var c_myScatterSeries = 'scatter-series';
+var c_myPieGroup = 'pie-group-';
+var c_myPieHeader = 'pie-header';
+var c_myPieWedge = 'pie-wedge-';
 // Blobs -- maybe not all used...
 var c_blobSeriesGroup = 'blob-series-group-';
 var c_blobPairGroup = 'blob-pair-group';
 var c_blobShape = 'blob-shape';
 var c_blobText = 'blob-text';
-var c_blobHeaderGroup = 'blob-header-group-';
+var c_myBlobHeaderGroup = 'blob-header-group';
 var c_blobHeaderRect = 'blob-header-rect';
 var c_blobHeaderText = 'blob-header-text';
 var c_indexDot = 'index-dot-';
 var c_breakSymbol = 'broken-scale-symbol';
 var c_breakBaseline = 'broken-scale-baseline';
+//
+var c_myAxisHeader = 'axis-header';
 
 // GLOBALS
 var zeroLineBehind = true;

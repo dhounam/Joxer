@@ -9,6 +9,10 @@
 //@include "Silver Bullet legends.jsx"
 //@include "Silver Bullet content.jsx"
 //@include "Silver Bullet axes.jsx"
+//@include "Silver Bullet series.jsx"
+//@include "Silver Bullet zeroline.jsx"
+//@include "Silver Bullet utils.jsx"
+//@include "Silver Bullet blobs.jsx"
 // I assume, call main code file last...
 //@include "Silver Bullet main.jsx"
 /*
