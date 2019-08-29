@@ -31,7 +31,7 @@ function processDoubleScaleAxisHeaders(aGroup, index) {
     for (var gNo = 0; gNo < aGroup.groupItems.length; gNo++) {
         var thisG = aGroup.groupItems[gNo];
         if (thisG.name.search(headRoot) >= 0) {
-					$.bp();
+					// $.bp();
             processOneDoubleScaleAxisHeader(thisG);
          }
     }
