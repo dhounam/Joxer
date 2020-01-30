@@ -65,14 +65,15 @@ function createPanelLayers(backGroup, backLayer) {
     var pTotal = outerPanelGroup.groupItems.length;
     if (pTotal > 0) {
       // Add a content layer for each panel
+      var counter = 1;
       for (var pNo = pTotal - 1; pNo >= 0; pNo--) {
-        var counter = pTotal - pNo;
         pLayer = newContentLayer(parent, counter);
         // FIXME: currently numbered and ordered backwards
         // Panels are numbered from 1
         // Now we move the panel header rects and strings
         var pGroup = outerPanelGroup.groupItems[pNo];
         movePanelHeaders(pGroup, pLayer);
+        counter++;
       }
     } else {
       // No panels; but create an empty content layer
@@ -80,6 +81,7 @@ function createPanelLayers(backGroup, backLayer) {
     }
   }
   // Delete the original panels group
+  // debugger;
   outerPanelGroup.remove();
   return true;
 }
@@ -257,13 +259,41 @@ function saveAsEPS(myFile) {
 }
 // SAVE AS EPS ends
 
+// FILE IS INVALID
+// Called from openSVG to check that the file has
+// .svg extension, and that it isn't already open
+function fileIsInvalid(myFile) {
+  // myFile is file name. Lose ext.
+  var fArray = myFile.split(".");
+  if (fArray.length < 2 || fArray[1] !== 'svg') {
+    alert("This doesn't look like an SVG file...")
+    return true;
+  }
+  var fName = fArray[0].replace("%20", " ");
+  var docs = app.documents;
+  for (var dNo = 0; dNo < docs.length; dNo++) {
+    var dName = docs[dNo].name.split(".")[0];
+    if (dName === fName) {
+      alert("You already have a file of this name open. Please close it and try again...")
+      return true;
+    }
+  }
+  return false;
+}
+// FILE IS INVALID
 
 function openSVG() {
   var openedSVG;
   var svgPath = new File(c_svgFolder);
-	var myFile= svgPath.openDlg("Import SVG file...");
+  var myFile= svgPath.openDlg("Import SVG file...");
+  var canOpenFile = true;
+	if (myFile == null) {
+    canOpenFile = false;
+  } else if (fileIsInvalid(myFile.name)) {
+    canOpenFile = false;
+  }
 	var myDoc;
-	if(myFile != null) {
+	if(canOpenFile) {
     // If we selected a file, open it...
 		myDoc = app.open(myFile, DocumentColorSpace.CMYK);
 		// ...and set colourspace

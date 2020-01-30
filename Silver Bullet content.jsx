@@ -49,8 +49,67 @@ function fixLineSeriesGroupStructure(cGroup) {
 }
 // FIX LINE SERIES GROUP STRUCTURE ends
 
+// PROCESS TABLE RULES
+// Called from processTableGroup to handle
+// table rules
+function processTableRules(rGrp) {
+  // debugger;
+  for (var rNo = 0; rNo < rGrp.pathItems.length; rNo++) {
+    var thisRule = rGrp.pathItems[rNo];
+    setPathAttributes(thisRule);
+  }
+}
+// PROCESS TABLE RULES ends
+
+// PROCESS TABLE FILLS
+// Called from processTableGroup to handle
+// table fills (tints)
+function processTableFills(rGrp) {
+  // debugger;
+  for (var rNo = 0; rNo < rGrp.pathItems.length; rNo++) {
+    var thisRule = rGrp.pathItems[rNo];
+    setPathAttributes(thisRule);
+  }
+}
+// PROCESS TABLE FILLS ends
+
+// PROCESS TABLE GROUP
+// Called from processContentLayer. Args are an outer
+// table group, and the document obj
+function processTableGroup(tGroup, myDoc) {
+  // Table has 3 child groups: text, tints and rules
+	// Number of outer group:
+  var cIndex = isolateElementIndex(tGroup.name);
+  // Text
+  var tgName = c_myTableTextGroupName + (cIndex);
+  var textGroup = myDoc.groupItems[tgName];
+  // Move the entire text group into the content layer:
+	var contentLayer = isolateContentLayer(myDoc, cIndex);
+	textGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+	
+  // Text comes as a group of separate textItems,
+  // each corresponding to a Sibyl tSpan
+  var textElement = textGroup.groupItems[0];
+  var goodText = rationaliseText(textElement, true);
+  // Rules
+  var rgName = c_myTableRulesGroupName + (cIndex);
+  var rulesGroup = myDoc.groupItems[rgName];
+  // Move to content layer
+	rulesGroup.move(contentLayer, ElementPlacement.PLACEATEND);
+  //
+  processTableRules(rulesGroup);
+  // Fills
+  var fgName = c_myTableFillsGroupName + (cIndex);
+  var fillsGroup = myDoc.groupItems[fgName];
+  // Move to content layer
+	fillsGroup.move(contentLayer, ElementPlacement.PLACEATEND);
+  //
+  processTableRules(fillsGroup);
+}
+// PROCESS TABLE GROUP ends
+
 // PROCESS CONTENT GROUP
-// Called from processContentLayer. Args are a single content (panel) group, and its index number
+// Called from processContentLayer. Args are a single content (panel) group, and the doc obj
 function processContentGroup(cGroup, myDoc) {
 	// One content group (i.e. panel) may contain:
 	//		xaxis-group-n
@@ -76,22 +135,11 @@ function processContentGroup(cGroup, myDoc) {
 	//
 	// Number of this group:
 	// 		(SVG groups are numbered from zero)
-  var cIndex = cGroup.name.split('-');
-  cIndex = Number(cIndex[cIndex.length - 1]);
+  var cIndex = isolateElementIndex(cGroup.name);
 	// Target layer. If there's more than one panel, content layers
 	// are numbered from 1; if not, they're un-numbered
-	var layerName;
-	var contentLayer;
-	try {
-		layerName = c_myContentLayer + (cIndex + 1);
-		contentLayer = myDoc.layers[layerName];
-	}
-	catch(e) {
-		// No numbered group, so look for unnumbered (delete hyphen)
-		layerName = c_myContentLayer.substring(0, c_myContentLayer.length - 1);
-		contentLayer = myDoc.layers[layerName];
-	}
-	// Move the entire SVG group into the content layer:
+  // Move the entire SVG group into the content layer:
+	var contentLayer = isolateContentLayer(myDoc, cIndex);
 	cGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 	
 	// Kludge (here) to fix a structural anomaly with line charts
@@ -191,13 +239,15 @@ function processContentGroup(cGroup, myDoc) {
 function processContentGroups(myDoc) {
 	// Content groups are in original 'main' group
 	var mainGroup = myDoc.groupItems[c_itsMainGroup];	
-	// So let's loop through...
+  // So let's loop through...
 	var contentTotal = mainGroup.groupItems.length;
 	//  I can't assume that mainGroup contains *only* panel groups...
 	for (var gNo = contentTotal - 1; gNo >= 0; gNo--) {
     var myGroup = mainGroup.groupItems[gNo];
     if (myGroup.name.search('content') >= 0) {
       processContentGroup(myGroup, myDoc);      
+    } else if (myGroup.name.search('table') >= 0) {
+      processTableGroup(myGroup, myDoc);
     }
 	}
 	return true;

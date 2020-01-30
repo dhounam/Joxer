@@ -1,45 +1,47 @@
 ﻿// PROCESS ONE DOUBLE-SCALE AXIS HEADER
-// Called from processDoubleScaleAxisHeaders. Converts 
-function processOneDoubleScaleAxisHeader(hGroup) {
-    // alert('In processOneDoubleScaleAxisHeader')
-	if (!rationaliseText(hGroup, true)) {
-        alert('Double-scale axis header rationalisation failed. Sorry...');
-    }
-    // Processed text is a textFrame in hGroup
-    // Move to parent group and delete hGroup (unless it self-destructs)
-		var toGroup = hGroup.parent;
-		if (hGroup.textFrames.length > 0) {
-			hGroup.textFrames[0].move(toGroup, ElementPlacement.PLACEATEND);
-		}
-		try {
-			hGroup.remove();
-		}
-		catch(e) {};
-}
+// Originally called from processDoubleScaleAxisHeaders. 
+// No longer called
+// function processOneDoubleScaleAxisHeader(hGroup) {
+//     // alert('In processOneDoubleScaleAxisHeader')
+// 	if (!rationaliseText(hGroup, true)) {
+//         alert('Double-scale axis header rationalisation failed. Sorry...');
+//     }
+//     // Processed text is a textFrame in hGroup
+//     // Move to parent group and delete hGroup (unless it self-destructs)
+// 		var toGroup = hGroup.parent;
+// 		if (hGroup.textFrames.length > 0) {
+// 			hGroup.textFrames[0].move(toGroup, ElementPlacement.PLACEATEND);
+// 		}
+// 		try {
+// 			hGroup.remove();
+// 		}
+// 		catch(e) {};
+// }
 // PROCESS ONE DOUBLE-SCALE AXIS HEADER ends
 
 // PROCESS DOUBLE SCALE AXIS HEADER
 // Param is axis group. Header is, putatively, a child groupItem
-function processDoubleScaleAxisHeaders(aGroup, index) {
-    // alert('In processDoubleScaleAxisHeaders')
-    // Look for headers and, if found, process them
-    var headRoot = 'yaxis-header-' + index;
-    var leftName = headRoot + '-left';
-    var rightName = headRoot + '-right';
-    // The trouble is: the headers' IDs have suffixed metadata
-    // So loop
-    for (var gNo = 0; gNo < aGroup.groupItems.length; gNo++) {
-        var thisG = aGroup.groupItems[gNo];
-        if (thisG.name.search(headRoot) >= 0) {
-					// $.bp();
-            processOneDoubleScaleAxisHeader(thisG);
-         }
-    }
-}
+// No longer called
+// function processDoubleScaleAxisHeaders(aGroup, index) {
+//      alert('Does processDoubleScaleAxisHeaders ever get called?')
+//     // Look for headers and, if found, process them
+//     var headRoot = 'yaxis-header-' + index;
+//     var leftName = headRoot + '-left';
+//     var rightName = headRoot + '-right';
+//     // The trouble is: the headers' IDs have suffixed metadata
+//     // So loop
+//     for (var gNo = 0; gNo < aGroup.groupItems.length; gNo++) {
+//         var thisG = aGroup.groupItems[gNo];
+//         if (thisG.name.search(headRoot) >= 0) {
+// 					// $.bp();
+//             processOneDoubleScaleAxisHeader(thisG);
+//          }
+//     }
+// }
 // PROCESS DOUBLE SCALE AXIS HEADER ends
 
 function processAxisHeader(aGroup) {
-	// Loop to find header group:
+  // Loop to find header group:
 	var hGroup;
 	var hFrame;
 	for (var gNo = 0; gNo < aGroup.groupItems.length; gNo++) {
@@ -163,11 +165,11 @@ function processAxisGroup(aGroup, prefix, index, axisSide) {
 		}
 	}
 	// Labels
-	// NOTE: I modded rationaliseText so that it now returns
-	// a groupItem. In this case, the new group to which
-	// labels have been moved. This allows headers to be
-	// moved to that group, below.
-	var rationalisedLabelsGroup = rationaliseText(labelsGroup, false);
+  // rationaliseText returns a groupItem: In this case, the new group
+  // to which labels have been moved.
+  var rationalisedLabelsGroup = rationaliseText(labelsGroup, false);
+  // Axis headers will move to content layer (below, later)
+  var groupForAxisHeaders = rationalisedLabelsGroup.parent.parent.parent;
 	//  {
   //       alert('Label rationalisation on ' + prefix + '-axis failed. Sorry...');
   //       return false;
@@ -189,7 +191,7 @@ function processAxisGroup(aGroup, prefix, index, axisSide) {
 	// Move header into labels group:
 	if (typeof hFrame !== 'undefined') {
 		hFrame.name = prefix + c_myAxisHeader + axisSide;
-		hFrame.move(rationalisedLabelsGroup, ElementPlacement.PLACEATEND);
+		hFrame.move(groupForAxisHeaders, ElementPlacement.PLACEATBEGINNING);
 	}
 	// Originally moved brokenscale or baseline into labels group
     // But now (Oct'19) stays where I put it above, in content layer

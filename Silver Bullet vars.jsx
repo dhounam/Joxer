@@ -77,6 +77,9 @@ var c_metaPropSep = ':';
 
 // Newline (text wrap) tag
 var c_newline = '\r';
+// Tab
+var c_tabChar = '\t';
+var c_tabSubstitute = '___';
 
 // String to use for groups that get deleted
 var c_deleteme = 'Group to be deleted';
@@ -157,6 +160,10 @@ var c_breakSymbol = 'broken-scale-symbol';
 var c_breakBaseline = 'broken-scale-baseline';
 //
 var c_myAxisHeader = 'axis-header';
+// Tables
+var c_myTableTextGroupName = 'table-text-group-';
+var c_myTableRulesGroupName = 'table-rules-group-';
+var c_myTableFillsGroupName = 'table-fills-group-';
 
 // GLOBALS
 var zeroLineBehind = true;

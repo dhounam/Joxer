@@ -10,7 +10,7 @@ function processLineSeries(group, contentLayer) {
   var isStacked = false;
   // Lines and possible fills are embedded in enclosing groups
 // for(var i = 0; i < group.groupItems.length; i++) {
-for(var i = group.groupItems.length - 1; i >= 0; i--) {
+for (var i = group.groupItems.length - 1; i >= 0; i--) {
   var thisLine = group.groupItems[i].pathItems[0];
   setPathAttributes(thisLine);
   // Layer cake?
@@ -32,6 +32,7 @@ if (group.pathItems.length > 0) {
   var iDot = group.pathItems[0];
   if (iDot.name.search(c_indexDot) === 0) {
       setPathAttributes(iDot);
+      iDot.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
   }
 }
 }
