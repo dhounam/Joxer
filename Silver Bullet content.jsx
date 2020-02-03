@@ -108,6 +108,39 @@ function processTableGroup(tGroup, myDoc) {
 }
 // PROCESS TABLE GROUP ends
 
+// BRING MIXED SCALE LINE SERIES TO FRONT
+// If there's a mixed/double chart with column and line series, I have
+// to move the lines in front of any zero base-line. And it's a bit
+// fiddly...
+function bringMixedScaleLineSeriesToFront(contentLayer) {
+  var pItems = contentLayer.pathItems;
+  // Is there a zero line?
+  var zeroLine = lookForElement(contentLayer, 'pathItems', 'axis-zero-line');
+  if (typeof zeroLine === 'undefined') {
+    return;
+  }
+  // The problem is that I have to work backwards to restructure in the
+  // same order as Sibyl; but if I re-stack on the fly, that messes up
+  // the structure, so that series get 'left behind'
+  //  get an array of names
+  var pNameArray = [];
+  for (var pNo = 0; pNo < pItems.length; pNo ++) {
+    var thisPath = pItems[pNo];
+    if (thisPath.name.search('stroke-path-') >= 0) {
+      // The array is 'back to front'
+      pNameArray.unshift(thisPath.name);
+    }
+  }
+  // Now move all the series, as named in the array, to the front
+  // (i.e., in front of any zero line)
+  for (var elNo in pNameArray) {
+    var pName = pNameArray[elNo];
+    var thisPath = pItems[pName];
+    thisPath.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+  }
+}
+// BRING MIXED SCALE LINE SERIES TO FRONT ends
+
 // PROCESS CONTENT GROUP
 // Called from processContentLayer. Args are a single content (panel) group, and the doc obj
 function processContentGroup(cGroup, myDoc) {
@@ -115,7 +148,7 @@ function processContentGroup(cGroup, myDoc) {
 	//		xaxis-group-n
 	//		yaxis-group-n-left
 	//		yaxis-group-n-right
-	//		series-group
+	//		series-group(s)
 	//		zeroline-group-n
 	//
 	// Special case: line series (lines and points) may be buried
@@ -179,16 +212,15 @@ function processContentGroup(cGroup, myDoc) {
 		bGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING)
 	}
 	catch (e) {};
-	// Series...
+  // Series...
+  var seriesTypeList = '';
 	// There may be more than one series group, so I loop through...
 	for (var gNo = cGroup.groupItems.length - 1; gNo >= 0; gNo--) {
 		var myGroup = cGroup.groupItems[gNo];
 		if (myGroup.name.search('series-group') >= 0) {
-			var seriesType = myGroup.name.split(':')[1];
+      var seriesType = myGroup.name.split(':')[1];
+      seriesTypeList += seriesType
 			switch(seriesType) {
-				case 'line':
-					processLineSeries(myGroup, contentLayer);
-					break;
 				case 'points':
 					// Points on pointline series
 					processColBarPointSeries(myGroup, contentLayer, true);
@@ -209,7 +241,10 @@ function processContentGroup(cGroup, myDoc) {
 					// Note: thermo group includes 'spindles'
 					processThermoSeries(myGroup, contentLayer);
 					break;
-			}
+        case 'line':
+          processLineSeries(myGroup, contentLayer);
+          break;
+        }
 			myGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 		}
 	}
@@ -231,6 +266,10 @@ function processContentGroup(cGroup, myDoc) {
         processScatterZaxisKey(keyGroup, contentLayer);
     }
     catch(e) {};
+    // If mixed/double scale with lines and columns, bring lines to front:
+    if (seriesTypeList.search('line') >= 0 && seriesTypeList.search('column') >= 0) {
+      bringMixedScaleLineSeriesToFront(contentLayer);
+    }
 		
 }
 // PROCESS CONTENT GROUP ends

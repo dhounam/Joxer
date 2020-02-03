@@ -52,6 +52,7 @@ function moveChildrenUpstairs(source, target, toBeginning) {
 // Args are a parent group,
 // the collection type (groupItems, pathItems...) of the sought element,
 // and the name of an element
+// (Note: the collection type name has to be in its plural form: 'pathItems', etc.)
 // Returns the element, or undefined
 function lookForElement(parent, eType, eName) {
   var theElement;
