@@ -1,6 +1,4 @@
-﻿// 
-
-
+﻿
 // PROCESS ONE LEGEND
 // Called from processLegends. Arg is a single legend 'pair' of pathItem (rect or line)
 // and text (textFrame or group-of-tspans)
@@ -45,7 +43,7 @@ function forceTextOverprinting(lHead) {
 // Called from processLegends to unpick
 // one legend-set
 function processLegendSet(legSet) {
-// Each legendSet should consist of:
+  // Each legendSet should consist of:
 	//	- a header group
 	//	- 2 or more indexed legend groups--
 	// 		each containing a key and a text-group...
@@ -81,11 +79,11 @@ function processLegendSet(legSet) {
 			if (oneGroup.textFrames.length > 0) {
 				var theHeader = oneGroup.textFrames[0];
 				setTextFrameAttributes(theHeader);
-                 // Special whacky tweak for legend header to force overprinting
-                 forceTextOverprinting(theHeader)
+        // Special whacky tweak for legend header to force overprinting
+        forceTextOverprinting(theHeader)
 			} else {
-                oneGroup.remove();
-             }
+        oneGroup.remove();
+      }
 		}
 	}	
 }
@@ -134,7 +132,6 @@ function processLegends(myDoc) {
 	//					a key element
 	//					a group of textFrames
 	// First, move all legend-key groups up a level
-//~ 	$.bp();
 	var setCount = itsLegendsGroup.groupItems.length;
 	if (setCount === 0) {
 			return true;
@@ -144,13 +141,13 @@ function processLegends(myDoc) {
   var counter = 1
 	for (var setNo = setCount - 1; setNo >= 0; setNo--) {
 		var mySet = itsLegendsGroup.groupItems[setNo];
-        // Get original number
-         var mySetName = mySet.name;
-         var myArray = mySetName.split('-');
-         var mySetNo = Number(myArray[myArray.length - 1]) + 1;
-		processLegendSet(mySet);
-        mySet.name = c_myLegendSet + mySetNo;
-        counter++;
+      // Get original number
+      var mySetName = mySet.name;
+      var myArray = mySetName.split('-');
+      var mySetNo = Number(myArray[myArray.length - 1]) + 1;
+		  processLegendSet(mySet);
+      mySet.name = c_myLegendSet + mySetNo;
+      counter++;
 	}
 	// Now restructure
 	// NOTE: ideally I'd have done this from processLegendSet,
@@ -164,35 +161,38 @@ function processLegends(myDoc) {
 		restructureLegendSet(mySet);
 	}
 	// Now that everything's clean, move into the matching content layer
-    // Count layers. If < 4, my layers are the default 'Layer 1', a background
-    // layer and an unnumbered content layer
-    var oneChart = (myDoc.layers.length < 4);
-    if (oneChart) {
-        var lName = c_myContentLayer.substr(0, c_myContentLayer.length - 1);
-        var cLayer = myDoc.layers[lName];
-        itsLegendsGroup.groupItems[0].move(cLayer,ElementPlacement.PLACEATBEGINNING);
-    } else {
-        // Content layers are numbered
-        var setCount = itsLegendsGroup.groupItems.length;
-        for (var setNo = setCount - 1; setNo >= 0; setNo--) {
-            var lSet = itsLegendsGroup.groupItems[setNo];
-            // Get the number of the legends group:
-            var lSetName = lSet.name;
-            var lsnArray = lSetName.split('-');
-            var lSetNo = lsnArray[lsnArray.length - 1];
-            var cLayer = myDoc.layers[c_myContentLayer + lSetNo];
-            lSet.move(cLayer,ElementPlacement.PLACEATBEGINNING);
-        }
+  // Count layers. If < 4, my layers are the default 'Layer 1', a background
+  // layer and an unnumbered content layer
+  var oneChart = (myDoc.layers.length < 4);
+  if (oneChart) {
+      var lName = c_myContentLayer.substr(0, c_myContentLayer.length - 1);
+      var cLayer = myDoc.layers[lName];
+      itsLegendsGroup.groupItems[0].move(cLayer,ElementPlacement.PLACEATBEGINNING);
+  } else {
+    // Content layers are numbered
+    var setCount = itsLegendsGroup.groupItems.length;
+    for (var setNo = setCount - 1; setNo >= 0; setNo--) {
+      var lSet = itsLegendsGroup.groupItems[setNo];
+      // Get the number of the legends group:
+      var lSetName = lSet.name;
+      var lsnArray = lSetName.split('-');
+      var lSetNo = lsnArray[lsnArray.length - 1];
+      var cLayer = myDoc.layers[c_myContentLayer + lSetNo];
+      // lSet.move(cLayer,ElementPlacement.PLACEATBEGINNING);
+      // Feb'20: move legend pairs right up to content group
+      var setLen = lSet.groupItems.length;
+      for (var lsNo = setLen - 1; lsNo >= 0; lsNo--) {
+        lSet.groupItems[lsNo].move(cLayer,ElementPlacement.PLACEATBEGINNING);
+      }
+    }
 	}
 	// Kill the import group
 	itsLegendsGroup.remove();
-
 	return true;
 }
 // PROCESS LEGENDS ends
 
 // ========== SCATTER Z-AXIS KEY ============
-
 
 // PROCESS SCATTER Z-AXIS KEY
 // Called from Content
@@ -210,5 +210,3 @@ function processScatterZaxisKey(keyGroup, contentLayer) {
     }
 }
 // PROCESS SCATTER Z-AXIS KEY ends
-
-    
