@@ -183,7 +183,7 @@ function processContentGroup(cGroup, myDoc) {
 	var xName = c_myXaxisGroup + cIndex;
 	var xAxisGroup = lookForElement(cGroup, 'groupItems', xName);
 	if (typeof xAxisGroup !== 'undefined') {
-		processAxisGroup(xAxisGroup, 'x', cIndex, '');
+		processAxisGroup(xAxisGroup, 'x', cIndex, '', contentLayer);
 		moveChildrenUpstairs(xAxisGroup, contentLayer, false);
 		// NOTE: don't forget to delete cGroup (if it doesn't self-destruct)
 	}
@@ -193,14 +193,14 @@ function processContentGroup(cGroup, myDoc) {
 	var yLeftName = c_myYaxisGroup + cIndex + c_left;
 	var yAxisGroup = lookForElement(cGroup, 'groupItems', yLeftName);
 	if (typeof yAxisGroup !== 'undefined') {
-		processAxisGroup(yAxisGroup, 'y', cIndex, c_left);
+		processAxisGroup(yAxisGroup, 'y', cIndex, c_left, contentLayer);
 		moveChildrenUpstairs(yAxisGroup, contentLayer, false);
 	}
 
 	var yRightName = c_myYaxisGroup + cIndex + c_right;
 	var yAxisGroup = lookForElement(cGroup, 'groupItems', yRightName);
 	if (typeof yAxisGroup !== 'undefined') {	
-		processAxisGroup(yAxisGroup, 'y', cIndex, c_right);
+		processAxisGroup(yAxisGroup, 'y', cIndex, c_right, contentLayer);
 		moveChildrenUpstairs(yAxisGroup, contentLayer, false);
 	}
 

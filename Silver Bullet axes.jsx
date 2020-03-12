@@ -73,7 +73,7 @@ function processAxisHeader(aGroup) {
 // Args are the axis group; a prefix ('x' or 'y'); the panel index;
 // and a left/right string for y-axis (for x-axis, this is an empty string)
 // So, in theory, this can handle x or y axes, linear or ordinal...
-function processAxisGroup(aGroup, prefix, index, axisSide) {
+function processAxisGroup(aGroup, prefix, index, axisSide, contentLayer) {
 	// An axis group may contain:
 	//		xaxis-ticks-group-n (or yaxis...)
 	//		xaxis-labels-group-n (empty by default)
@@ -168,8 +168,10 @@ function processAxisGroup(aGroup, prefix, index, axisSide) {
   // rationaliseText returns a groupItem: In this case, the new group
   // to which labels have been moved.
   var rationalisedLabelsGroup = rationaliseText(labelsGroup, false);
-  // Axis headers will move to content layer (below, later)
-  var groupForAxisHeaders = rationalisedLabelsGroup.parent.parent.parent;
+  // Axis headers now move to content layer (below, later), so comm'd out:
+  // var groupForAxisHeaders = rationalisedLabelsGroup.parent.parent.parent;
+  // var contentLayerName = c_myContentLayer + index;
+  // var contextForAxisHeaders = myDoc.layers[contentLayerName];
 	//  {
   //       alert('Label rationalisation on ' + prefix + '-axis failed. Sorry...');
   //       return false;
@@ -188,10 +190,11 @@ function processAxisGroup(aGroup, prefix, index, axisSide) {
 	// if (prefix === 'y') {
 	// 	processDoubleScaleAxisHeaders(aGroup, index);
 	// }
-	// Move header into labels group:
+  // Move header:
+  // debugger;
 	if (typeof hFrame !== 'undefined') {
 		hFrame.name = prefix + c_myAxisHeader + axisSide;
-		hFrame.move(groupForAxisHeaders, ElementPlacement.PLACEATBEGINNING);
+		hFrame.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 	}
 	// Originally moved brokenscale or baseline into labels group
     // But now (Oct'19) stays where I put it above, in content layer

@@ -97,8 +97,9 @@ function getMetadata(id, isText) {
 	// I think I need a default object, with all properties...
 	var myObj = makeDefaultMetadataObject(isText);
 	if (id.search(c_metaDataSep) > -1) {
-		// Separate element name and id
-		firstSplit = id.split(c_metaDataSep);
+    // Separate element name and id
+    // (If I set a 'name' property on the id, it will overwrite the default)
+    firstSplit = id.split(c_metaDataSep);
 		myObj.name = firstSplit[0];
 		// If there's metadata, process it...
 		var props = firstSplit[1];
@@ -113,13 +114,13 @@ function getMetadata(id, isText) {
 				// So split (again!) and triage
 				var pArray = oneProp.split(c_metaPropSep);
 				// This is a property name:value pair
-				var prop = myTrim(pArray[0]);
-				var val = myTrim(pArray[1]);
+        var prop = myTrim(pArray[0]);
+        var val = myTrim(pArray[1]);
 				myObj[prop] = val;
 			}
 		}
 	} else {
-			// No metadata; return name
+			// No metadata
 			myObj.name = id;
 	}
 	return myObj;
@@ -239,13 +240,13 @@ function setPathAttributes(myE) {
 					fillElement(myE, val);
 					break;
 				case 'stroke':
-                    if (val !== 'none') {
-                        // Ignore if no stroke.
-                        // But if so, set strokewidth, too
-                        var sWid = eProps.strokewidth;
-                        strokeElement(myE, val, sWid);
-                    }
-                    break;
+          if (val !== 'none') {
+            // Ignore if no stroke.
+            // But if so, set strokewidth, too
+            var sWid = eProps.strokewidth;
+            strokeElement(myE, val, sWid);
+          }
+          break;
 			}
 		}
 	}

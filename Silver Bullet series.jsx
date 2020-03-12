@@ -63,14 +63,17 @@ function processColBarPointSeries(group, contentLayer, isPoints) {
 // PROCESS THERMO SERIES
 // Arg 'group' includes any number of series groups, and one group of spindles
 function processThermoSeries(group, contentLayer) {
+  zeroLineBehind = false;
+  // debugger;
   // Group contains a subgroup for each series, so...
-  for (var gNo = 0; gNo < group.groupItems.length; gNo++) {
+  for (var gNo = group.groupItems.length - 1; gNo >= 0; gNo--) {
     var seriesGroup = group.groupItems[gNo];
     // Loop by paths
     for(var rNo = 0; rNo < seriesGroup.pathItems.length; rNo++) {
       var thisPath = seriesGroup.pathItems[rNo];
       setPathAttributes(thisPath);
     }
+    seriesGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
   }
 }
 // PROCESS THERMO SERIES ends
@@ -81,25 +84,43 @@ function processThermoSeries(group, contentLayer) {
 function processScatterPointItems(pGroup) {
   // A scatter point will have a dot; and may have
   // a link and text
+  var groupName = c_myScatterPoint;
   var pLen = pGroup.pageItems.length;
+  // D3 may leave vestigial empty items in the group. Get rid of them:
+  for (pNo = pLen - 1; pNo >= 0; pNo--) {
+    var item = pGroup.pageItems[pNo];
+    var iName = item.name;
+    if (iName.length === 0) {
+      item.remove();
+    }
+  }
+  // So now the group is 'clean'. It contains either:
+  //    3 'real' items (dot, link and text), or
+  //    just the dot
+  // Loop again:
+  pLen = pGroup.pageItems.length;
   for (pNo = pLen - 1; pNo >= 0; pNo--) {
     var item = pGroup.pageItems[pNo];
     var iName = item.name;
     if (iName.search('dot') >= 0 ) {
       setPathAttributes(item, false);
       if (pLen === 1) {
-        item.move(pGroup.parent, ElementPlacement.PLACEATBEGINNING)
+        // Unlabelled point:
+        item.move(pGroup.parent, ElementPlacement.PLACEATBEGINNING);
       }
     } else if (iName.search('link') >= 0 ) {
       setPathAttributes(item, false);
-    } else {
-      // text
+    } else if (iName.search('label') >= 0) {
+      // If there's a label, set its content as the point-group name
+      groupName = item.contents;
       setTextFrameAttributes(item);
+    } else {
+      // Belt and braces: 
+      item.remove();
     }
   }
-  //
   if (pLen > 1) {
-    pGroup.name = c_myScatterPoint;
+    pGroup.name = groupName;
   } else {
     pGroup.remove();
   }

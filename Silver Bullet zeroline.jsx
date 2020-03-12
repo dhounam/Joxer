@@ -39,7 +39,7 @@ function processZeroLine(zGrp, contentLayer) {
 					zLine.move(topAxisGroup, ElementPlacement.PLACEBEFORE);
 				}
 		} else {
-			// Bars/cols, layercakes: goes right to front
+			// Bars/cols, layercakes, thermos: goes right to front
 			zLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 		}
 	}
