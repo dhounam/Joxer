@@ -351,6 +351,7 @@ function makeNewTextFrame(oFrame, newGroup) {
     };
     var newText = makeText(textProps);
     newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
+    return newText;
 }
 // MAKE NEW TEXT FRAME ends
 

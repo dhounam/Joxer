@@ -4,7 +4,7 @@ var contentExists = true;
 
 // FIX LINE SERIES GROUP STRUCTURE
 // Called from processContentGroup.
-// This is at least partly temporary, until I can fix in Sibyl
+// NOTE: this is at least partly temporary, until I can fix in Sibyl
 // There are 2 issues:
 // 		Line grouping has an additional interposed group,
 // 			so move line series sub-group up a level
@@ -16,17 +16,21 @@ function fixLineSeriesGroupStructure(cGroup) {
 	for (var gNo = gLen - 1; gNo >= 0; gNo--) {
     // Hunt through the content group
 		var thisGroup = cGroup.groupItems[gNo];
-    // $.bp();
 		if (thisGroup.name === c_itsAllLineSeriesOuterGroup) {
-			// This 'all-series' group contains possible inner groups:
-             //     line-series-group:points
+			// This 'all-series' group should contain 2 inner groups:
              //     line-series-group:line
+             //     line-series-group:points
+            //  debugger;
              var g2Len = thisGroup.groupItems.length - 1;
              for (var g2No = g2Len; g2No >= 0; g2No--) {
                 var innerGroup = thisGroup.groupItems[g2No];
-                if (innerGroup.name.search(':') > 0) {
-                    // Target group of individual :line or :points series groups
+                if (
+                  innerGroup.name.search(':points') > 0 ||
+                  innerGroup.name.search(':line') > 0
+                ) {
+                    // Target group of individual line or points series groups
                     // If these have contents, move them up a level
+                    // debugger;
                     if (innerGroup.groupItems.length > 0) {
                         innerGroup.move(cGroup, ElementPlacement.PLACEATEND);
                     } else {
@@ -36,16 +40,6 @@ function fixLineSeriesGroupStructure(cGroup) {
             }
 		}
 	}
-	// try {
-	// 	var outerLineGroup = cGroup.groupItems[c_itsAllLineSeriesGroup];
-	// 	if (typeof outerLineGroup !== 'undefined') {
-	// 		for (var olgNo = (outerLineGroup.groupItems.length - 1); olgNo >= 0; olgNo--) {
-	// 			outerLineGroup.groupItems[olgNo].move(cGroup, ElementPlacement.PLACEATBEGINNING);
-	// 		}
-	// 		outerLineGroup.remove();
-	// 	}
-	// }
-	// catch(e) {};
 }
 // FIX LINE SERIES GROUP STRUCTURE ends
 
@@ -188,20 +182,35 @@ function processContentGroup(cGroup, myDoc) {
 		// NOTE: don't forget to delete cGroup (if it doesn't self-destruct)
 	}
 
+  // NOTE: axis stacking, Mar'20
+  // Scatters, at least,
+  // need it the other way round (so that grey x-axis ticks
+  // dont overlap y-axis black baseline)
+  // But how do we know it's a scatter chart? We have to loop
+  // through to a series group and look there:
+  var yBefore = false;
+  for (var gNo = 0; gNo < cGroup.groupItems.length; gNo++) {
+    var myGroup = cGroup.groupItems[gNo];
+    if (myGroup.name.search('scatter') >= 0) {
+      yBefore = true;
+      break;
+    }
+  }
+
 	// y axis
 	// y-axis can be left and/or right...
 	var yLeftName = c_myYaxisGroup + cIndex + c_left;
 	var yAxisGroup = lookForElement(cGroup, 'groupItems', yLeftName);
 	if (typeof yAxisGroup !== 'undefined') {
 		processAxisGroup(yAxisGroup, 'y', cIndex, c_left, contentLayer);
-		moveChildrenUpstairs(yAxisGroup, contentLayer, false);
-	}
-
+		moveChildrenUpstairs(yAxisGroup, contentLayer, yBefore);
+  }
+  
 	var yRightName = c_myYaxisGroup + cIndex + c_right;
 	var yAxisGroup = lookForElement(cGroup, 'groupItems', yRightName);
 	if (typeof yAxisGroup !== 'undefined') {	
 		processAxisGroup(yAxisGroup, 'y', cIndex, c_right, contentLayer);
-		moveChildrenUpstairs(yAxisGroup, contentLayer, false);
+		moveChildrenUpstairs(yAxisGroup, contentLayer, yBefore);
 	}
 
 	// Blobs (if any)
@@ -221,10 +230,6 @@ function processContentGroup(cGroup, myDoc) {
       var seriesType = myGroup.name.split(':')[1];
       seriesTypeList += seriesType
 			switch(seriesType) {
-				case 'points':
-					// Points on pointline series
-					processColBarPointSeries(myGroup, contentLayer, true);
-					break;
 				case 'column':
 					processColBarPointSeries(myGroup, contentLayer, false);
 					break;
@@ -244,17 +249,32 @@ function processContentGroup(cGroup, myDoc) {
         case 'line':
           processLineSeries(myGroup, contentLayer);
           break;
-        }
+        case 'points':
+          // Points on pointline series
+          // debugger;
+          processColBarPointSeries(myGroup, contentLayer, true);
+          break;
+      }
 			myGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 		}
-	}
+  }
+  // Reloop to bring linepoint groups to front
+  // debugger;
+  // for (gNo = cGroup.groupItems.length - 1; gNo >= 0; gNo--) {
+  for (gNo = 0; gNo < contentLayer.groupItems.length; gNo++) {
+		var myGroup = contentLayer.groupItems[gNo];
+		if (myGroup.name.search('point-lines') >= 0) {
+      // debugger;
+			myGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    }
+  }
 
 	// Zero line (if any)
 	var zName = c_itsZeroLineGroup + cIndex;
     try {
         var zGroup = cGroup.groupItems[zName];
         // Process and move to content layer
-        processZeroLine(zGroup, contentLayer);
+        processZeroLines(zGroup, contentLayer);
     }
 	catch(e) {};
     

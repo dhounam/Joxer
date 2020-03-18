@@ -3,44 +3,65 @@
 //    Columns and bars
 //    Thermometers
 
+// MOVE MATCHING POINTS IN FRONT
+// Called from processLineSeries. For point-lines, finds
+// the points group matching the series path, and moves
+// the group immed'y in front of the path
+function moveMatchingPointsInFront(thisPath, contentLayer) {
+  // First, get a series number
+  var pArray = thisPath.name.split('-');
+  var seriesNo = pArray[pArray.length - 1];
+  // Look for a corresponding linepoints group:
+  var pgName = 'points-group-' + seriesNo;
+  try {
+    var pGroup = contentLayer.groupItems[pgName];
+    pGroup.move(thisPath, ElementPlacement.PLACEBEFORE);
+  }
+  catch(e) {};
+}
+// MOVE MATCHING POINTS IN FRONT ends
+
 // PROCESS LINE SERIES
 // Called from processContentGroup to deal with a collection of line series,
 // each of which is a pathItem. Arg is the group of series.
 function processLineSeries(group, contentLayer) {
   var isStacked = false;
   // Lines and possible fills are embedded in enclosing groups
-// for(var i = 0; i < group.groupItems.length; i++) {
-for (var i = group.groupItems.length - 1; i >= 0; i--) {
-  var thisLine = group.groupItems[i].pathItems[0];
-  setPathAttributes(thisLine);
-  // Layer cake?
-  if (group.groupItems[i].pathItems.length > 1) {
-    var thisFill = group.groupItems[i].pathItems[1];
-    setPathAttributes(thisFill);
-    thisFill.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
-    // Some redundancy, but still: zero line comes to front of layercakes
-    // (flag is global)
-    zeroLineBehind = false;
-  } else {
-    zeroLineBehind = true;
+  // for(var i = 0; i < group.groupItems.length; i++) {
+  for (var i = group.groupItems.length - 1; i >= 0; i--) {
+    var thisLine = group.groupItems[i].pathItems[0];
+    setPathAttributes(thisLine);
+    // Layer cake?
+    if (group.groupItems[i].pathItems.length > 1) {
+      var thisFill = group.groupItems[i].pathItems[1];
+      setPathAttributes(thisFill);
+      thisFill.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+      // Some redundancy, but still: zero line comes to front of layercakes
+      // (flag is global)
+      zeroLineBehind = false;
+    } else {
+      zeroLineBehind = true;
+    }
+    thisLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    // If there are points on the line series, we need
+    // them in front of the path
+    moveMatchingPointsInFront(thisLine, contentLayer);
   }
-  thisLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
-}
-// And handle any index dot. The assumption is that the
-// overall line series group can contain only 1 pathItem: the dot
-if (group.pathItems.length > 0) {
-  var iDot = group.pathItems[0];
-  if (iDot.name.search(c_indexDot) === 0) {
-      setPathAttributes(iDot);
-      iDot.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+  // And handle any index dot. The assumption is that the
+  // overall line series group can contain only 1 pathItem: the dot
+  if (group.pathItems.length > 0) {
+    var iDot = group.pathItems[0];
+    if (iDot.name.search(c_indexDot) === 0) {
+        setPathAttributes(iDot);
+        iDot.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    }
   }
-}
 }
 // PROCESS LINE SERIES ends
 
 // PROCESS COL-BAR-POINT SERIES
 // Called from Content.processContentGroup to process a
-// weries of column or bar rects, or a (line-) point series dots
+// series of column or bar rects, or (line-) point series dots
 function processColBarPointSeries(group, contentLayer, isPoints) {
   // Zero line flag, unless points for pointline series
   if (!isPoints) {
@@ -55,7 +76,7 @@ function processColBarPointSeries(group, contentLayer, isPoints) {
       setPathAttributes(thisPath, false);
     }
     seriesGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
-    seriesGroup.name = c_myLinePointSeries;
+    // seriesGroup.name = c_myLinePointSeries;
   }
 }
 // PROCESS COL-BAR-POINT SERIES ends
@@ -113,7 +134,17 @@ function processScatterPointItems(pGroup) {
     } else if (iName.search('label') >= 0) {
       // If there's a label, set its content as the point-group name
       groupName = item.contents;
-      setTextFrameAttributes(item);
+      // debugger;
+      // setTextFrameAttributes(item);
+      // rationaliseText(item, false);
+      var newText = makeNewTextFrame(item, pGroup);
+      debugger;
+      // makeNewTextFrame moves the new text element to the
+      // beginning of the group, putting us in an endless loop
+      // So put it after the element it's a clone of...
+      newText.move(item, ElementPlacement.PLACEAFTER);
+      // ...then delete that.
+      item.remove();
     } else {
       // Belt and braces: 
       item.remove();

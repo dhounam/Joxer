@@ -206,17 +206,18 @@ function processSibyl(myDoc) {
     alert("Initial document restructure failed. Sorry...");
     return;
   }
-	// LEGENDS
-	if (!processLegends(myDoc)) {
-		alert("Failed to process legends...");
-		return false;
-	}
-
+  
 	// Now sort out the SVG content groups (in Content)
 	if (!processContentGroups(myDoc)) {
-		alert("Failed to process main group of chart-specific content...");
+    alert("Failed to process main group of chart-specific content...");
 		return false;
 	}
+  
+  // LEGENDS
+  if (!processLegends(myDoc)) {
+    alert("Failed to process legends...");
+    return false;
+  }
 
 	// Finally, kill the original default SVG layer
 	// No: done in loop below
@@ -247,10 +248,22 @@ function processSibyl(myDoc) {
 }
 // PROCESS SIBYL ends
 
+// FIX FILE NAME
+// Called from saveAsEPS to remove any number from file name
+function fixFileName(fileName) {
+  // I don't need to explicitly remove extension;
+  // Illy seems to cope with that
+  // var fName = fileName.replace('.svg', '');
+  // Lose number, if any -- e.g.: ' (2)'
+  var fName = fileName.replace(/\s?\(\d\)/,'');
+  return fName;
+}
+// FIX FILE NAME
+
 // SAVE AS EPS
 // Called from importSibyl to save file as EPS to output folder
 function saveAsEPS(myFile) {
-	var path = c_outbox + myFile.name;
+	var path = c_outbox + fixFileName(myFile.name);
 	var newFile = new File(path);
 	var saveOpts = new EPSSaveOptions();
 	saveOpts.cmykPostScript = true;

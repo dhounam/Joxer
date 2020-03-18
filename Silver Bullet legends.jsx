@@ -40,21 +40,16 @@ function forceTextOverprinting(lHead) {
 // FORCE LEGEND HEAD OVERPRINTING ends
 
 // PROCESS LEGEND SET
-// Called from processLegends to unpick
-// one legend-set
+// Called from processLegends to unpick one legend-set
 function processLegendSet(legSet) {
   // Each legendSet should consist of:
 	//	- a header group
-	//	- 2 or more indexed legend groups--
-	// 		each containing a key and a text-group...
+	//	- a legendkey group, containing 2 or more indexed legend groups--
+	// 		each containing a path and a text-group...
 	var legCount = legSet.groupItems.length	
 	// Is this necessary?
-	// if (legCount < 2) { return false; }
-	// The legend-set group should contain 2 items:
-	//		legend header group
-	//		legend key group
-	// Looping:
-	// $.bp();
+  // if (legCount < 2) { return false; }
+  //
 	for (var legNo = 0; legNo < legCount; legNo++) {
 		var oneGroup = legSet.groupItems[legNo];
 		if (oneGroup.name.search('key') >= 0) {
@@ -73,14 +68,13 @@ function processLegendSet(legSet) {
           lPairGroup.remove();
         }
 			}
-		}
-		else if (oneGroup.name.search('header')) {
+		} else if (oneGroup.name.search('header')) {
 			// Header group
 			if (oneGroup.textFrames.length > 0) {
 				var theHeader = oneGroup.textFrames[0];
 				setTextFrameAttributes(theHeader);
         // Special whacky tweak for legend header to force overprinting
-        forceTextOverprinting(theHeader)
+        forceTextOverprinting(theHeader);
 			} else {
         oneGroup.remove();
       }
@@ -93,25 +87,37 @@ function restructureLegendSet(legSet) {
 	var legCount = legSet.groupItems.length;
 	// The legend set should consist of 2 groups:
 	// keys and header. Loop to isolate the keys
-	var keysGroup;
+  var keysGroup;
+  var headerGroup;
 	for (var legNo = 0; legNo < legCount; legNo++) {
 		var oneGroup = legSet.groupItems[legNo];
 		if (oneGroup.name.search('key') >= 0) {
 			// This is the 'keys' group
 			keysGroup = oneGroup;
+		} else if (oneGroup.name.search('header') >= 0) {
+			// 'Header' group
+			headerGroup = oneGroup;
 		}
 	}
-	if (typeof keysGroup !== undefined) {
-		for (var i = keysGroup.groupItems.length - 1; i >= 0; i--) {
-			var lPairGroup = keysGroup.groupItems[i];
+	if (typeof keysGroup !== "undefined") {
+    for (var i = keysGroup.groupItems.length - 1; i >= 0; i--) {
+      var lPairGroup = keysGroup.groupItems[i];
 			lPairGroup.move(legSet, ElementPlacement.PLACEATEND);
 		}
-	}
+  }
+  if (typeof headerGroup !== "undefined") {
+    var hText = headerGroup.textFrames[0];
+      hText.move(legSet, ElementPlacement.PLACEATBEGINNING);
+  }
 }
 
 // PROCESS LEGENDS
 // Called from processSibyl. Arg is the main legends group, 'silver-chart-legends-group', which is a child
-// of the background layer and will contain one or more legendset-groups ('legendset-group-n')
+// of the background layer and will contain one or more legendset-groups ('legendset-group-n').
+// Each of those legendset-groups will, in turn, consist of:
+//    a legendheader-group, containing just a single text item (but possibly empty)
+//    a legendkey-group, containing a series of 'pair' groups, each consisting of
+//        a path and a group of tspans
 function processLegends(myDoc) {
 	// First, look for a legends group
 	try {
@@ -121,33 +127,24 @@ function processLegends(myDoc) {
 		// No legend sets found. Fair enough.
 		return true;
 	}
-	// Still here? the imported legends group,
-	// consists of one or more legendset groups.
-	// While these exist in a limited context, I'll restructure
-	// Legends group contains two or more legendset groups,
-	// each containing:
-	//		a legend-header group (possibly empty)
-	//		a legend-key group containing 2 or more legend groups,
-	//			each containing:
-	//					a key element
-	//					a group of textFrames
-	// First, move all legend-key groups up a level
+	// Still here? the main legends group consists of one or more, panel-specific, legendset groups
 	var setCount = itsLegendsGroup.groupItems.length;
 	if (setCount === 0) {
-			return true;
+    return true;
 	}
 	// Still here? There's at least 1 legend-set
   // Process backwards, preserving original numbering
   var counter = 1
 	for (var setNo = setCount - 1; setNo >= 0; setNo--) {
-		var mySet = itsLegendsGroup.groupItems[setNo];
-      // Get original number
-      var mySetName = mySet.name;
-      var myArray = mySetName.split('-');
-      var mySetNo = Number(myArray[myArray.length - 1]) + 1;
-		  processLegendSet(mySet);
-      mySet.name = c_myLegendSet + mySetNo;
-      counter++;
+    // So this is a legendset-group, relating to a single panel
+    var mySet = itsLegendsGroup.groupItems[setNo];
+    // Get original number
+    var mySetName = mySet.name;
+    var myArray = mySetName.split('-');
+    var mySetNo = Number(myArray[myArray.length - 1]) + 1;
+    processLegendSet(mySet);
+    mySet.name = c_myLegendSet + mySetNo;
+    counter++;
 	}
 	// Now restructure
 	// NOTE: ideally I'd have done this from processLegendSet,
@@ -157,7 +154,7 @@ function processLegends(myDoc) {
 	// my background layer
 	// Loop by legendSets
 	for (var setNo = setCount - 1; setNo >= 0; setNo--) {
-		var mySet = itsLegendsGroup.groupItems[setNo];
+    var mySet = itsLegendsGroup.groupItems[setNo];
 		restructureLegendSet(mySet);
 	}
 	// Now that everything's clean, move into the matching content layer
@@ -167,23 +164,19 @@ function processLegends(myDoc) {
   if (oneChart) {
       var lName = c_myContentLayer.substr(0, c_myContentLayer.length - 1);
       var cLayer = myDoc.layers[lName];
-      itsLegendsGroup.groupItems[0].move(cLayer,ElementPlacement.PLACEATBEGINNING);
+      var setGroup = itsLegendsGroup.groupItems[0];
+      finalLegendSetMove(setGroup, cLayer);
   } else {
     // Content layers are numbered
     var setCount = itsLegendsGroup.groupItems.length;
     for (var setNo = setCount - 1; setNo >= 0; setNo--) {
-      var lSet = itsLegendsGroup.groupItems[setNo];
-      // Get the number of the legends group:
-      var lSetName = lSet.name;
+      var setGroup = itsLegendsGroup.groupItems[setNo];
+      // Match number of legendset to content layer
+      var lSetName = setGroup.name;
       var lsnArray = lSetName.split('-');
       var lSetNo = lsnArray[lsnArray.length - 1];
       var cLayer = myDoc.layers[c_myContentLayer + lSetNo];
-      // lSet.move(cLayer,ElementPlacement.PLACEATBEGINNING);
-      // Feb'20: move legend pairs right up to content group
-      var setLen = lSet.groupItems.length;
-      for (var lsNo = setLen - 1; lsNo >= 0; lsNo--) {
-        lSet.groupItems[lsNo].move(cLayer,ElementPlacement.PLACEATBEGINNING);
-      }
+      finalLegendSetMove(setGroup, cLayer);
     }
 	}
 	// Kill the import group
@@ -191,6 +184,25 @@ function processLegends(myDoc) {
 	return true;
 }
 // PROCESS LEGENDS ends
+
+// FINAL LEGEND SET MOVE
+// Kludge introd'd Mar'20 to move legendset header
+// and pairs up to content layer
+function finalLegendSetMove(setGroup, cLayer) {
+  var pairCount = setGroup.groupItems.length;
+  for (var pairNo = pairCount - 1; pairNo >= 0; pairNo--) {
+    var myPair = setGroup.groupItems[pairNo];
+    myPair.move(cLayer,ElementPlacement.PLACEATBEGINNING);
+  }
+  // And header, if any
+  if (setGroup.textFrames.length > 0) {
+    var header = setGroup.textFrames[0];
+    if (typeof header !== 'undefined') {
+      header.move(cLayer,ElementPlacement.PLACEATBEGINNING);
+    }
+  }
+}
+// FINAL LEGEND SET MOVE ends
 
 // ========== SCATTER Z-AXIS KEY ============
 

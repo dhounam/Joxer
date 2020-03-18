@@ -18,32 +18,32 @@ function findTopAxisGroup(contentLayer) {
 }
 // FIND TOP AXIS GROUP ends
 
-// PROCESS ZERO LINE
-// Sets attributes on a red zero line and moves it into stack
+// PROCESS ZERO LINES
+// Sets attributes on red zero lines and moves them into stack
 // position, in front of bar/column group, but behind line
-// group.
+// or scatter groups
 // NOTE: there may be more refinements necessary, for other styles
 // and for double scales...
-function processZeroLine(zGrp, contentLayer) {
-	try {
-		zLine = zGrp.pathItems[0];
-	}
-	catch (e) {};
-	if (typeof zLine !== 'undefined') {
-		setPathAttributes(zLine);
-		// Position is either at top or behind first group...
-		if (zeroLineBehind) {
-			// In most cases, zero line goes behind any series, and in front of all axis groups
-			var topAxisGroup = findTopAxisGroup(contentLayer);
+function processZeroLines(zGrp, contentLayer) {
+  var zCount = zGrp.pathItems.length;
+  for (var zNo = zCount - 1; zNo >= 0; zNo--) {
+    zLine = zGrp.pathItems[zNo];
+    if (typeof zLine !== 'undefined') {
+      setPathAttributes(zLine);
+      // Position is either at top or behind first group...
+      if (zeroLineBehind) {
+        // In most cases, zero line goes behind any series, and in front of all axis groups
+        var topAxisGroup = findTopAxisGroup(contentLayer);
 				if (typeof topAxisGroup !== 'undefined') {
-					zLine.move(topAxisGroup, ElementPlacement.PLACEBEFORE);
+          zLine.move(topAxisGroup, ElementPlacement.PLACEBEFORE);
 				}
-		} else {
-			// Bars/cols, layercakes, thermos: goes right to front
-			zLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
-		}
-	}
+      } else {
+        // Bars/cols, layercakes, thermos: goes right to front
+        zLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+      }
+    }
+  }
 	// Whatever, delete the separate group
 	zGrp.remove();
 }
-// PROCESS ZERO LINE ends
+// PROCESS ZERO LINES ends
