@@ -84,7 +84,7 @@ function processColBarPointSeries(group, contentLayer, isPoints) {
 // PROCESS THERMO SERIES
 // Arg 'group' includes any number of series groups, and one group of spindles
 function processThermoSeries(group, contentLayer) {
-  zeroLineBehind = false;
+  zeroLineBehind = true;
   // debugger;
   // Group contains a subgroup for each series, so...
   for (var gNo = group.groupItems.length - 1; gNo >= 0; gNo--) {
