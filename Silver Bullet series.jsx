@@ -138,7 +138,6 @@ function processScatterPointItems(pGroup) {
       // setTextFrameAttributes(item);
       // rationaliseText(item, false);
       var newText = makeNewTextFrame(item, pGroup);
-      debugger;
       // makeNewTextFrame moves the new text element to the
       // beginning of the group, putting us in an endless loop
       // So put it after the element it's a clone of...
@@ -158,29 +157,56 @@ function processScatterPointItems(pGroup) {
 }
 // PROCESS SCATTER POINT ITEMS ends
 
+// PROCESS TRENDLINES
+// Called from processScatterSeries to handle trendlines
+function processScatterTrendlines(trendGroup) {
+  // Group contains one or more trendline pathItems
+  const pCount = trendGroup.pathItems.length;
+  for (var pNo = 0; pNo < pCount; pNo++) {
+    setPathAttributes(trendGroup.pathItems[pNo]);
+  }
+  trendGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+}
+// PROCESS TRENDLINES ends
+
+// PROCESS ONE SCATTER SERIES
+// Called from processScatterSeries to process individual scatter series
+function processOneScatterSeries(seriesGroup) {
+  var pLen = seriesGroup.groupItems.length;
+  if (pLen > 0) {
+    // Each seriesGroup then contains a number of pointGroups,
+    // each containing the dot, link and text
+    // Loop by pointGroups
+    for (var pNo = seriesGroup.groupItems.length - 1; pNo >= 0; pNo--) {
+      var pointGroup = seriesGroup.groupItems[pNo];
+      processScatterPointItems(pointGroup);
+    }
+    seriesGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    seriesGroup.name = c_myScatterSeries;
+  } else {
+    // Just kill any empty group
+    // (Currently, scatters contrive to include an empty group: '<div>')
+    // NOTE: kill that in Sibyl
+    seriesGroup.remove();
+  }
+
+}
+// PROCESS ONE SCATTER SERIES ends
+
+// PROCESS SCATTER SERIES
+// Called from
 function processScatterSeries(group, contentLayer) {
   // Group contains a subgroup for each series, so...
   for (var gNo = group.groupItems.length - 1; gNo >= 0; gNo--) {
     var seriesGroup = group.groupItems[gNo];
-    var pLen = seriesGroup.groupItems.length;
-    if (pLen > 0) {
-      // Each seriesGroup then contains a number of pointGroups,
-      // each containing the dot, link and text
-      // Loop by pointGroups
-      for (var pNo = seriesGroup.groupItems.length - 1; pNo >= 0; pNo--) {
-        var pointGroup = seriesGroup.groupItems[pNo];
-        processScatterPointItems(pointGroup);
-      }
-      seriesGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
-      seriesGroup.name = c_myScatterSeries;
+    if (seriesGroup.name.search('trendline') >= 0) {
+      processScatterTrendlines(seriesGroup, contentLayer);
     } else {
-      // Just kill any empty group
-      // (Currently, scatters contrive to include an empty group: '<div>')
-      // NOTE: kill that in Sibyl
-      seriesGroup.remove();
+      processOneScatterSeries(seriesGroup, contentLayer);
     }
   }
 }
+// PROCESS SCATTER SERIES ends
 
 // PROCESS ONE PIE
 // Called from processPieSeries. Argument is a group
