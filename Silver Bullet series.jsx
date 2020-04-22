@@ -165,7 +165,12 @@ function processScatterTrendlines(trendGroup) {
   for (var pNo = 0; pNo < pCount; pNo++) {
     setPathAttributes(trendGroup.pathItems[pNo]);
   }
-  trendGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+  // Single trendline stands alone in content layer; otherwise move entire group
+  if (pCount === 1) {
+    trendGroup.pathItems[0].move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+  } else {
+    trendGroup.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+  }
 }
 // PROCESS TRENDLINES ends
 
