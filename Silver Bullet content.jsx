@@ -107,6 +107,7 @@ function processTableGroup(tGroup, myDoc) {
 // to move the lines in front of any zero base-line. And it's a bit
 // fiddly...
 function bringMixedScaleLineSeriesToFront(contentLayer) {
+  // debugger;
   var pItems = contentLayer.pathItems;
   // Is there a zero line?
   var zeroLine = lookForElement(contentLayer, 'pathItems', 'axis-zero-line');
@@ -120,7 +121,7 @@ function bringMixedScaleLineSeriesToFront(contentLayer) {
   var pNameArray = [];
   for (var pNo = 0; pNo < pItems.length; pNo ++) {
     var thisPath = pItems[pNo];
-    if (thisPath.name.search('stroke-path-') >= 0) {
+    if (thisPath.name.search('line-series-path-') >= 0) {
       // The array is 'back to front'
       pNameArray.unshift(thisPath.name);
     }
@@ -183,15 +184,14 @@ function processContentGroup(cGroup, myDoc) {
 	}
 
   // NOTE: axis stacking, Mar'20
-  // Scatters, at least,
-  // need it the other way round (so that grey x-axis ticks
-  // dont overlap y-axis black baseline)
-  // But how do we know it's a scatter chart? We have to loop
+  // Scatters and v-thermos need stacking the other way round
+  // (so that grey x-axis ticks don't overlap y-axis black baseline)
+  // But how do we know it's scatter/v-thermo? We have to loop
   // through to a series group and look there:
   var yBefore = false;
   for (var gNo = 0; gNo < cGroup.groupItems.length; gNo++) {
-    var myGroup = cGroup.groupItems[gNo];
-    if (myGroup.name.search('scatter') >= 0) {
+    var gName = cGroup.groupItems[gNo].name;
+    if (gName.search('scatter') >= 0 || gName.search('thermo-vertical') >= 0) {
       yBefore = true;
       break;
     }
