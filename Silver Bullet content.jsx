@@ -242,7 +242,11 @@ function processContentGroup(cGroup, myDoc) {
 				case 'scatter':
 					processScatterSeries(myGroup, contentLayer);
 					break;
-				case 'thermo':
+				case 'thermo-horizontal':
+					// Note: thermo group includes 'spindles'
+					processThermoSeries(myGroup, contentLayer);
+					break;
+				case 'thermo-vertical':
 					// Note: thermo group includes 'spindles'
 					processThermoSeries(myGroup, contentLayer);
 					break;

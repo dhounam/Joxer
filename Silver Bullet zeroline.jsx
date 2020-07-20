@@ -1,22 +1,25 @@
 ﻿// Process zero line
 
-// FIND TOP AXIS GROUP
+// FIND TOP AXIS OR SPINDLE GROUP
 // Called from processZeroLine
 // Loops through the content layer and returns the first axis group
-function findTopAxisGroup(contentLayer) {
+// Mod July'20 will look for spindle group, too
+function findTopAxisOrSpindleGroup(contentLayer) {
 	var thisItem;
 	var iCount = contentLayer.pageItems.length;
 	// Assume we count from the top...
 	for (var iNo = 0; iNo < iCount; iNo++) {
 		var thisItem = contentLayer.pageItems[iNo];
-		if (thisItem.name.search('axis') >= 0) {
+		if (
+      thisItem.name.search('axis') >= 0 ||
+      thisItem.name.search('spindle') >= 0) {
 			topAxisGroup = thisItem;
 			break;
 		}
 	}
 	return topAxisGroup;
 }
-// FIND TOP AXIS GROUP ends
+// FIND TOP AXIS OR SPINDLE GROUP ends
 
 // PROCESS ZERO LINES
 // Sets attributes on red zero lines and moves them into stack
@@ -33,12 +36,12 @@ function processZeroLines(zGrp, contentLayer) {
       // Position is either at top or behind first group...
       if (zeroLineBehind) {
         // In most cases, zero line goes behind any series, and in front of all axis groups
-        var topAxisGroup = findTopAxisGroup(contentLayer);
+        var topAxisGroup = findTopAxisOrSpindleGroup(contentLayer);
 				if (typeof topAxisGroup !== 'undefined') {
           zLine.move(topAxisGroup, ElementPlacement.PLACEBEFORE);
 				}
       } else {
-        // Bars/cols, layercakes, thermos: goes right to front
+        // Bars/cols, layercakes: goes right to front
         zLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
       }
     }
