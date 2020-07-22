@@ -7,12 +7,13 @@
 function findTopAxisOrSpindleGroup(contentLayer) {
 	var thisItem;
 	var iCount = contentLayer.pageItems.length;
-	// Assume we count from the top...
+  // Assume we count from the top...
+  // ...so we'll hit any spindle group first
 	for (var iNo = 0; iNo < iCount; iNo++) {
 		var thisItem = contentLayer.pageItems[iNo];
 		if (
-      thisItem.name.search('axis') >= 0 ||
-      thisItem.name.search('spindle') >= 0) {
+      thisItem.name.search('spindle') >= 0 ||
+      thisItem.name.search('axis') >= 0) {
 			topAxisGroup = thisItem;
 			break;
 		}
@@ -36,9 +37,17 @@ function processZeroLines(zGrp, contentLayer) {
       // Position is either at top or behind first group...
       if (zeroLineBehind) {
         // In most cases, zero line goes behind any series, and in front of all axis groups
-        var topAxisGroup = findTopAxisOrSpindleGroup(contentLayer);
-				if (typeof topAxisGroup !== 'undefined') {
-          zLine.move(topAxisGroup, ElementPlacement.PLACEBEFORE);
+        var topAxisOrSpindleGroup = findTopAxisOrSpindleGroup(contentLayer);
+				if (typeof topAxisOrSpindleGroup !== 'undefined') {
+          // Mega-kludge: move a RED zero line behind thermo spindles
+          // but a BLACK line in front of either spindles or axis ticks
+          const isSpindle = topAxisOrSpindleGroup.name.search('spindle') >= 0;
+          const noBlack = zLine.strokeColor.black === 0;
+          if (isSpindle && noBlack) {
+            zLine.move(topAxisOrSpindleGroup, ElementPlacement.PLACEAFTER);
+          } else {
+            zLine.move(topAxisOrSpindleGroup, ElementPlacement.PLACEBEFORE);
+          }
 				}
       } else {
         // Bars/cols, layercakes: goes right to front

@@ -81,6 +81,15 @@ function processColBarPointSeries(group, contentLayer, isPoints) {
 }
 // PROCESS COL-BAR-POINT SERIES ends
 
+function processThermoSpindles(group, contentLayer) {
+  // Simple group of spindles; process each
+  for(var sNo = 0; sNo < group.pathItems.length; sNo++) {
+    var spindle = group.pathItems[sNo];
+    setPathAttributes(spindle);
+  }
+  group.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+}
+
 // PROCESS THERMO SERIES
 // Arg 'group' includes any number of series groups, and one group of spindles
 function processThermoSeries(group, contentLayer) {

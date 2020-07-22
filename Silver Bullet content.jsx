@@ -228,6 +228,7 @@ function processContentGroup(cGroup, myDoc) {
 		var myGroup = cGroup.groupItems[gNo];
 		if (myGroup.name.search('series-group') >= 0) {
       var seriesType = myGroup.name.split(':')[1];
+      const spindleName = 'thermo-spindles-group-' + cIndex;
       seriesTypeList += seriesType
 			switch(seriesType) {
 				case 'column':
@@ -243,11 +244,14 @@ function processContentGroup(cGroup, myDoc) {
 					processScatterSeries(myGroup, contentLayer);
 					break;
 				case 'thermo-horizontal':
-					// Note: thermo group includes 'spindles'
+          // Handle spindes and series
+          const spindleGroup = cGroup.groupItems[spindleName];
+					processThermoSpindles(spindleGroup, contentLayer);
 					processThermoSeries(myGroup, contentLayer);
 					break;
 				case 'thermo-vertical':
-					// Note: thermo group includes 'spindles'
+          spindleGroup = cGroup.groupItems[spindleName];
+					processThermoSpindles(spindleGroup, contentLayer);
 					processThermoSeries(myGroup, contentLayer);
 					break;
         case 'line':
