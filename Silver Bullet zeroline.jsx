@@ -41,8 +41,8 @@ function processZeroLines(zGrp, contentLayer) {
 				if (typeof topAxisOrSpindleGroup !== 'undefined') {
           // Mega-kludge: move a RED zero line behind thermo spindles
           // but a BLACK line in front of either spindles or axis ticks
-          const isSpindle = topAxisOrSpindleGroup.name.search('spindle') >= 0;
-          const noBlack = zLine.strokeColor.black === 0;
+          var isSpindle = topAxisOrSpindleGroup.name.search('spindle') >= 0;
+          var noBlack = zLine.strokeColor.black === 0;
           if (isSpindle && noBlack) {
             zLine.move(topAxisOrSpindleGroup, ElementPlacement.PLACEAFTER);
           } else {

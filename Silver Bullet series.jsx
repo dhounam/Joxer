@@ -81,6 +81,8 @@ function processColBarPointSeries(group, contentLayer, isPoints) {
 }
 // PROCESS COL-BAR-POINT SERIES ends
 
+// PROCESS THERMO SPINDLES
+// Arg 1 is the group of spindles for a thermo chart
 function processThermoSpindles(group, contentLayer) {
   // Simple group of spindles; process each
   for(var sNo = 0; sNo < group.pathItems.length; sNo++) {
@@ -89,6 +91,7 @@ function processThermoSpindles(group, contentLayer) {
   }
   group.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
 }
+// PROCESS THERMO SPINDLES
 
 // PROCESS THERMO SERIES
 // Arg 'group' includes any number of series groups, and one group of spindles
@@ -170,7 +173,7 @@ function processScatterPointItems(pGroup) {
 // Called from processScatterSeries to handle trendlines
 function processScatterTrendlines(trendGroup) {
   // Group contains one or more trendline pathItems
-  const pCount = trendGroup.pathItems.length;
+  var pCount = trendGroup.pathItems.length;
   for (var pNo = 0; pNo < pCount; pNo++) {
     setPathAttributes(trendGroup.pathItems[pNo]);
   }
