@@ -97,17 +97,22 @@ function moveElementsToBackLayer(fromGrp) {
   for (var piNo = piCount - 1; piNo >= 0; piNo--) {
     var pItem = fromGrp.pageItems[piNo];
     // NOTE: strings end up stacked backwards -- re-order
-    // Inferentially, if this is a string group (which background
-    // strings always are), convert to text;
     if (pItem.name.search('string') >= 0) {
-      // Move it to backLayer
+      // Background strings move to background layer
       pItem.move(target, ElementPlacement.PLACEATBEGINNING);
       rationaliseText(pItem, true);
-    } else {
-      // Shapes
-      // Move it to backLayer
-      pItem.move(target, ElementPlacement.PLACEATBEGINNING);
+    } else if (pItem.typename === "PathItem") {
+      // Background shapes to background layer
+      // But numberbox rect stays in its group
+      if (pItem.name.search('shape') >= 0) {
+        pItem.move(target, ElementPlacement.PLACEATBEGINNING);
+      }
       setPathAttributes(pItem);
+    } else if (pItem.name.search('chartnumber-text') >= 0) {
+      // Numberbox text stays in its group and is
+      // assumed to be un-wrapped text
+      makeNewTextFrame(pItem, fromGrp);
+      pItem.remove();
     }
   }
 }

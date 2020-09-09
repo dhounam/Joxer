@@ -350,7 +350,9 @@ function makeNewTextFrame(oFrame, newGroup) {
         contentsArray: contentsArray
     };
     var newText = makeText(textProps);
-    newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
+    if (typeof newText !== 'undefined') {
+      newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
+    }
     return newText;
 }
 // MAKE NEW TEXT FRAME ends
