@@ -129,16 +129,18 @@ function makeText(tObj) {
 			textRange.characterAttributes.tracking = tObj.tracking;
              // By default: proportional lining
 			textRange.characterAttributes.figureStyle= FigureStyleType.PROPORTIONAL;
-             // Overprinting
-             var overprint = c_textOverprint.search(tObj.fill) >= 0;
-             textRange.characterAttributes.overprintFill = overprint;
+      // Overprinting
+      if (typeof tObj.fillName !== 'undefined') {
+        var overprint = c_textOverprint.search(tObj.fillName) >= 0;
+        textRange.characterAttributes.overprintFill = overprint;
+      }
 		}
-         // Proportional text for numbers...
-         if (tObj.name === 'title-string') {
-             doProportionalText(myText, true);
-         } else if (tObj.name.search('subtitle') >= 0) {
-             doProportionalText(myText, false);
-         }
+    // Proportional text for numbers...
+    if (tObj.name === 'title-string') {
+        doProportionalText(myText, true);
+    } else if (tObj.name.search('subtitle') >= 0) {
+        doProportionalText(myText, false);
+    }
 		return myText;
 		// Do I need to wrap the text? Apparently not...
 		// if (tObj.contents.search(c_newline) > -1) {
@@ -336,9 +338,12 @@ function makeNewTextFrame(oFrame, newGroup) {
         newline: false
     }];
     // Extract properties from original frame
+    // Note: fill is cmyk colour object
+    //       fillName is name of fill
     var textProps = {
         context: oFrame.parent,
         anchor: [anchorX, anchorY],
+        fillName: tProps.fill,
         fill: makeCmykColourObject(tProps.fill),
         font: oFrame.textRange.characterAttributes.textFont,
         size: oFrame.textRange.characters[0].size,

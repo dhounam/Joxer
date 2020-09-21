@@ -26,8 +26,9 @@ function moveMatchingPointsInFront(thisPath, contentLayer) {
 // each of which is a pathItem. Arg is the group of series.
 function processLineSeries(group, contentLayer) {
   var isStacked = false;
+  // There may be a layer cake top line
+  var topLine;
   // Lines and possible fills are embedded in enclosing groups
-  // for(var i = 0; i < group.groupItems.length; i++) {
   for (var i = group.groupItems.length - 1; i >= 0; i--) {
     var thisLine = group.groupItems[i].pathItems[0];
     setPathAttributes(thisLine);
@@ -47,14 +48,20 @@ function processLineSeries(group, contentLayer) {
     // them in front of the path
     moveMatchingPointsInFront(thisLine, contentLayer);
   }
-  // And handle any index dot. The assumption is that the
-  // overall line series group can contain only 1 pathItem: the dot
+  // Find any index dot or layercake topline
+  // hanging loose in the series group, and move up to content layer
   if (group.pathItems.length > 0) {
-    var iDot = group.pathItems[0];
-    if (iDot.name.search(c_indexDot) === 0) {
-        setPathAttributes(iDot);
-        iDot.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    for (pNo = group.pathItems.length - 1; pNo >= 0; pNo--) {
+      var sparePath = group.pathItems[0];
+      setPathAttributes(sparePath);
+      sparePath.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
     }
+    // Original assumption was that there'd just be a loose index dot
+    // var iDot = group.pathItems[0];
+    // if (iDot.name.search(c_indexDot) === 0) {
+    //     setPathAttributes(iDot);
+    //     iDot.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
+    // }
   }
 }
 // PROCESS LINE SERIES ends
