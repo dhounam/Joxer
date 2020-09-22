@@ -129,7 +129,7 @@ function makeText(tObj) {
 			textRange.characterAttributes.tracking = tObj.tracking;
              // By default: proportional lining
 			textRange.characterAttributes.figureStyle= FigureStyleType.PROPORTIONAL;
-      // Overprinting
+      // Overprinting.
       if (typeof tObj.fillName !== 'undefined') {
         var overprint = c_textOverprint.search(tObj.fillName) >= 0;
         textRange.characterAttributes.overprintFill = overprint;
@@ -231,7 +231,8 @@ function convertTextGroupToFrames(tGrp) {
 		// Assemble all properties into an object
 		var textProps = {
 			context: tGrp.parent,
-			anchor: [anchorX, anchorY],
+      anchor: [anchorX, anchorY],
+      fillName: tProps.fill,
 			fill: makeCmykColourObject(tProps.fill),
 			font: tGrp.textFrames[0].textRange.characterAttributes.textFont,
 			size: tGrp.textFrames[0].textRange.characters[0].size,
@@ -260,6 +261,7 @@ function setTextFrameAttributes(tFrame) {
 	// Position (seems to work better than 'anchor')
 	var position = tFrame.position;
 	// Fill (from name)
+	tObj.fillName = tProps.fill;
 	var fill = tProps.fill;
 	var colObj = makeCmykColourObject(fill);
 	tFrame.textRange.characterAttributes.fillColor = colObj;
