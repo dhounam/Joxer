@@ -39,13 +39,25 @@ function processZeroLines(zGrp, contentLayer) {
         // In most cases, zero line goes behind any series, and in front of all axis groups
         var topAxisOrSpindleGroup = findTopAxisOrSpindleGroup(contentLayer);
 				if (typeof topAxisOrSpindleGroup !== 'undefined') {
-          // Mega-kludge: move a RED zero line behind thermo spindles
+          // Mega-kludge: move a RED zero line behind thermo spindles...
+          // ...IF there's more than one series!!!
           // but a BLACK line in front of either spindles or axis ticks
           var isSpindle = topAxisOrSpindleGroup.name.search('spindle') >= 0;
+          // Thermometers: count series (could be farmed out)
+          var seriesCount = 0;
+          if (isSpindle) {
+            for (var i = 0; i < contentLayer.groupItems.length; i++) {
+              if (contentLayer.groupItems[i].name.search('series-group series-') >= 0) {
+                seriesCount++;
+              }
+            }
+          }
           var noBlack = zLine.strokeColor.black === 0;
-          if (isSpindle && noBlack) {
+          if (isSpindle && noBlack && seriesCount > 1) {
+            // PLACEAFTER = 'behind'
             zLine.move(topAxisOrSpindleGroup, ElementPlacement.PLACEAFTER);
           } else {
+            // PLACEBEFORE = 'in front of'
             zLine.move(topAxisOrSpindleGroup, ElementPlacement.PLACEBEFORE);
           }
 				}
