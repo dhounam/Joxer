@@ -261,7 +261,7 @@ function setTextFrameAttributes(tFrame) {
 	// Position (seems to work better than 'anchor')
 	var position = tFrame.position;
 	// Fill (from name)
-	tObj.fillName = tProps.fill;
+	// tObj.fillName = tProps.fill;
 	var fill = tProps.fill;
 	var colObj = makeCmykColourObject(fill);
 	tFrame.textRange.characterAttributes.fillColor = colObj;

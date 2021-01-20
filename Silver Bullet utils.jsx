@@ -133,7 +133,11 @@ function makeCmykColourObject(cName) {
     var myCol = new CMYKColor();
     var def = c_colourLookup[cName];
 		if (typeof def === 'undefined') {
-			def = c_failsafeColour;
+      // Originally I used a backup colour if the name
+      // wasn't found. Now return undefined, and caller
+      // leaves colours as they are
+      return undefined;
+			// def = c_failsafeColour;
 		}
     myCol.black = def.k;
     myCol.cyan = def.c;
@@ -179,13 +183,17 @@ function makeRgbColourObject(cName) {
 // Args are the element and the name of the colour
 function fillElement(myE, cName) {
   var myCol = makeCmykColourObject(cName);
+  // If no colour definition is found, leave 'as is'
+  if (typeof myCol === 'undefined') {
+    return;
+  }
   var overprint = c_textOverprint.search(cName) >= 0;
   if (myE.typename == 'PathItem') {
     myE.fillColor = myCol;
-        myE.overprintFill = overprint;
+    myE.overprintFill = overprint;
   } else if (myE.typename == 'TextFrame') {
-        myE.textRange.characterAttributes.fillColor = myCol;
-        myE.overprintFill = overprint;
+    myE.textRange.characterAttributes.fillColor = myCol;
+    myE.overprintFill = overprint;
   } else {
     alert('Sorry, failed to fill object ' + myE.name + ' with ' + cName);
   }
@@ -197,6 +205,10 @@ function fillElement(myE, cName) {
 // Also does overprinting
 function strokeElement(myE, cName, sWid) {
   var myCol = makeCmykColourObject(cName);
+  // If no colour definition is found, leave 'as is'
+  if (typeof myCol === 'undefined') {
+    return;
+  }
   if (myE.typename == 'PathItem') {
     myE.strokeColor = myCol;
     var overprint = c_textOverprint.search(cName) >= 0;
