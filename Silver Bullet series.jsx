@@ -21,13 +21,25 @@ function moveMatchingPointsInFront(thisPath, contentLayer) {
 }
 // MOVE MATCHING POINTS IN FRONT ends
 
+// function checkForLayerCakeTopLine(outerGroup) {
+//   var result = undefined;
+//   if (outerGroup.pathItems.length > 0) {
+//     var thePath = outerGroup.pathItems[0];
+//     if (thePath.name.search('top-line') > -1) {
+//       result = thePath;
+//     }
+//   }
+//   return result;
+// }
+
 // PROCESS LINE SERIES
 // Called from processContentGroup to deal with a collection of line series,
 // each of which is a pathItem. Arg is the group of series.
 function processLineSeries(group, contentLayer) {
   var isStacked = false;
-  // There may be a layer cake top line
-  var topLine;
+  // // Is there a layer cake top line? This will be isolated
+  // // inside the overall-series group
+  // var topLine = checkForLayerCakeTopLine(group);
   // Lines and possible fills are embedded in enclosing groups
   for (var i = group.groupItems.length - 1; i >= 0; i--) {
     var thisLine = group.groupItems[i].pathItems[0];
@@ -39,9 +51,9 @@ function processLineSeries(group, contentLayer) {
       thisFill.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
       // Some redundancy, but still: zero line comes to front of layercakes
       // (flag is global)
-      zeroLineBehind = false;
-    } else {
-      zeroLineBehind = true;
+    //   zeroLineBehind = false;
+    // } else {
+    //   zeroLineBehind = true;
     }
     thisLine.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
     // If there are points on the line series, we need
@@ -53,6 +65,12 @@ function processLineSeries(group, contentLayer) {
   if (group.pathItems.length > 0) {
     for (pNo = group.pathItems.length - 1; pNo >= 0; pNo--) {
       var sparePath = group.pathItems[0];
+      // Stacking for zero line: in front of layer cake; behind unstacked lines
+      if (sparePath.name.search('top-line') >= 0) {
+        zeroLineBehind = false;
+      } else {
+        zeroLineBehind = true;
+      }
       setPathAttributes(sparePath);
       sparePath.move(contentLayer, ElementPlacement.PLACEATBEGINNING);
     }

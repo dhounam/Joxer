@@ -211,14 +211,17 @@ function finalLegendSetMove(setGroup, cLayer) {
 function processScatterZaxisKey(keyGroup, contentLayer) {
     keyGroup.move(contentLayer, ElementPlacement.PLACEATEND);
     if (keyGroup.pathItems.length > 0) {
-        var keyDot = keyGroup.pathItems[0];
-        setPathAttributes(keyDot);
-        var keyText = keyGroup.textFrames[0];
+      var keyDot = keyGroup.pathItems[0];
+      setPathAttributes(keyDot);
     }
+    // Text may be TextFrame or a group of tspans!
     if (keyGroup.textFrames.length > 0) {
-		var keyText = keyGroup.textFrames[0];
-		setTextFrameAttributes(keyText);
-        forceTextOverprinting(keyText)
+      var keyText = keyGroup.textFrames[0];
+      setTextFrameAttributes(keyText);
+      forceTextOverprinting(keyText)
+    } else if (keyGroup.groupItems.length > 0) {
+      var keyTextGrp = keyGroup.groupItems[0];
+		  rationaliseText(keyTextGrp);
     }
 }
 // PROCESS SCATTER Z-AXIS KEY ends

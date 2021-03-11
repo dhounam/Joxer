@@ -229,23 +229,22 @@ function convertTextGroupToFrames(tGrp) {
 		}
 
 		// Assemble all properties into an object
-		var textProps = {
-			context: tGrp.parent,
-      anchor: [anchorX, anchorY],
-      fillName: tProps.fill,
-			fill: makeCmykColourObject(tProps.fill),
-			font: tGrp.textFrames[0].textRange.characterAttributes.textFont,
-			size: tGrp.textFrames[0].textRange.characters[0].size,
-			// Note: AI converts 'letter-spacing' to 'tracking'
-			tracking: tGrp.textFrames[0].textRange.characterAttributes.tracking,
-			leading: parseFloat(tProps.leading),
-			justification: just,
-			contents: contents,
-			contentsArray: contentsArray,
-			name: tProps.name
-		}
+		var textProps = {};
+    textProps.context = tGrp.parent;
+    textProps.anchor = [anchorX, anchorY];
+    textProps.fillName = tProps.fill;
+    textProps.fill = makeCmykColourObject(tProps.fill);
+    textProps.font = tGrp.textFrames[0].textRange.characterAttributes.textFont;
+    textProps.size = tGrp.textFrames[0].textRange.characters[0].size;
+    // Note = AI converts 'letter-spacing' to 'tracking;
+    textProps.tracking = tGrp.textFrames[0].textRange.characterAttributes.tracking;
+    textProps.leading = parseFloat(tProps.leading);
+    textProps.justification = just;
+    textProps.contents = contents;
+    textProps.contentsArray = contentsArray;
+    textProps.name = tProps.name;
 		var myText = makeText(textProps);
-        // tGrp.remove();
+    // tGrp.remove();
 	}
 	return myText;
 }
@@ -342,20 +341,19 @@ function makeNewTextFrame(oFrame, newGroup) {
     // Extract properties from original frame
     // Note: fill is cmyk colour object
     //       fillName is name of fill
-    var textProps = {
-        context: oFrame.parent,
-        anchor: [anchorX, anchorY],
-        fillName: tProps.fill,
-        fill: makeCmykColourObject(tProps.fill),
-        font: oFrame.textRange.characterAttributes.textFont,
-        size: oFrame.textRange.characters[0].size,
-        tracking: oFrame.textRange.characterAttributes.tracking,
-        leading: parseFloat(tProps.leading),
-        justification:  just,
-        name: tProps.name,
-        contents: contents,
-        contentsArray: contentsArray
-    };
+    var textProps = {};
+    textProps.context = oFrame.parent;
+    textProps.anchor = [anchorX, anchorY];
+    textProps.fillName = tProps.fill;
+    textProps.fill = makeCmykColourObject(tProps.fill);
+    textProps.font = oFrame.textRange.characterAttributes.textFont;
+    textProps.size = oFrame.textRange.characters[0].size;
+    textProps.tracking = oFrame.textRange.characterAttributes.tracking;
+    textProps.leading = parseFloat(tProps.leading);
+    textProps.justification =  just;
+    textProps.name = tProps.name;
+    textProps.contents = contents;
+    textProps.contentsArray = contentsArray;
     var newText = makeText(textProps);
     if (typeof newText !== 'undefined') {
       newText.move(newGroup, ElementPlacement.PLACEATBEGINNING);
@@ -367,7 +365,7 @@ function makeNewTextFrame(oFrame, newGroup) {
 
 
 // RATIONALISE TEXT
-// Called from processSibyl, etc., to convert text groups into textFrames...
+// Called variously, to convert text groups into textFrames...
 // Arg 1 is a groupItem: a strings group;
 // Arg 2 is a flag: use the group's name to set attributes on child textFrames
 function rationaliseText(grp, useGroupName) {

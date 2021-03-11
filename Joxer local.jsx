@@ -2,7 +2,7 @@
 // Updated August 2019
 // DEVELOPMENT version #includes LOCAL code file
 
-// Inclusions:
+// Inclusions are comm'd out in dev version
 //@includepath "~/Desktop/Silver Bullet/"
 //@include "Silver Bullet vars.jsx"
 //@include "Silver Bullet text.jsx"
