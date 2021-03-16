@@ -207,11 +207,11 @@ function convertTextGroupToFrames(tGrp) {
 				// And catch space at start of line:
 				myStr = myStr.replace((c_newline + ' '), c_newline);
 			}
-			var tfObj = {
-				contents: myStr,
-				textFont: tf.textRange.textFont,
-				newline: newline
-			}
+			var tfObj = {};
+      // I don't know if doing it like this really helps prevent MRAP errors...
+      tfObj. contents = myStr;
+      tfObj. textFont = tf.textRange.textFont;
+      tfObj. newline = newline;
 			contentsArray.push(tfObj);
 		}
 	}
@@ -333,22 +333,28 @@ function makeNewTextFrame(oFrame, newGroup) {
 		anchorX += width;
 	}
     var contents = oFrame.contents;
-    var contentsArray = [{
-        contents: contents,
-        textFont: oFrame.textRange.characterAttributes.textFont,
-        newline: false
-    }];
+    var textFont = oFrame.textRange.characterAttributes.textFont;
+    // Attempting to get round an internal MRAP error...
+    var contentsArray = [];
+    var caObj = {};
+    caObj.contents = contents;
+    caObj.textFont = textFont;
+    caObj.newline = false;
+    contentsArray.push(caObj);
     // Extract properties from original frame
     // Note: fill is cmyk colour object
     //       fillName is name of fill
+    // Trying to work round MRAP issues:
+    var textFont = oFrame.textRange.characterAttributes.textFont;
+    var tracking = oFrame.textRange.characterAttributes.tracking;
     var textProps = {};
     textProps.context = oFrame.parent;
     textProps.anchor = [anchorX, anchorY];
     textProps.fillName = tProps.fill;
     textProps.fill = makeCmykColourObject(tProps.fill);
-    textProps.font = oFrame.textRange.characterAttributes.textFont;
+    textProps.font = textFont;
     textProps.size = oFrame.textRange.characters[0].size;
-    textProps.tracking = oFrame.textRange.characterAttributes.tracking;
+    textProps.tracking = tracking;
     textProps.leading = parseFloat(tProps.leading);
     textProps.justification =  just;
     textProps.name = tProps.name;

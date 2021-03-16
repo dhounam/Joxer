@@ -34,8 +34,9 @@ function processOneLegend(legGroup, counter) {
 // Transparency.Isolate Blending off...
 // Even weirder: this seems to work... but when I open the document, Transparency is 'Normal'!
 function forceTextOverprinting(lHead) {
-    //
-    lHead.blendingMode = BlendModes.MULTIPLY;
+    // Comm'd out Mar'21. I suspect that this was necessary for an earlier version of Illy
+    // but it no longer seems necessary. If this holds, I can remove altogether...
+    // lHead.blendingMode = BlendModes.MULTIPLY;
 }
 // FORCE LEGEND HEAD OVERPRINTING ends
 
@@ -222,6 +223,34 @@ function processScatterZaxisKey(keyGroup, contentLayer) {
     } else if (keyGroup.groupItems.length > 0) {
       var keyTextGrp = keyGroup.groupItems[0];
 		  rationaliseText(keyTextGrp);
+      kludgeTidyingUpZaxisKey(keyGroup);
     }
-}
-// PROCESS SCATTER Z-AXIS KEY ends
+  }
+  // PROCESS SCATTER Z-AXIS KEY ends
+  
+  // KLUDGE TIDYING UP Z-AXIS KEY
+  // FIXME: Mar'21. Illustrator is throwing MRAPs all over the shop
+  // during debugging, so I'm kludging my way out of this.
+  // I'm left with three items in the original keyGroup:
+  //    - the 'dot' pathItem
+  //    - the original text groupItem, which seems to evaporate of its own accord
+  //    - a textRange which needs overprinting forced on it
+  //    (I'm being over-cautious about the possible survival of an original tSpan)
+  // If debugging ever settles down, this would repay a revisit...
+  function kludgeTidyingUpZaxisKey(keyGroup) {
+    var tfLen = keyGroup.textFrames.length
+    if (tfLen > 0) {
+      for (var tfNo = tfLen - 1; tfNo >= 0; tfNo--) {
+        var myTf = keyGroup.textFrames[tfNo];
+        if (myTf.name.search(c_metaDataSep) >= 0) {
+          myTf.remove();
+        } else {
+          myTf.textRange.characterAttributes.overprintFill = true;
+          // forceTextOverprinting(myTf);
+        }
+      }
+    }
+  }
+  // KLUDGE TIDYING UP Z-AXIS KEY ends
+  
+  
