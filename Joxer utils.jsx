@@ -271,6 +271,21 @@ function setPathAttributes(myE) {
             strokeElement(myE, val, sWid);
           }
           break;
+        case 'blendingmode':
+          // Blending mode
+          // Default is Multiply, which gives overprinting (Background only. Why not text? No idea)
+          // But as of Mar'26, Insider Landscape sets blending mode to Normal.
+          // So far, this 'case' only applies to blobs...
+          if (val === 'normal') {
+            myE.blendingMode = BlendModes.NORMAL;
+          } else {
+            myE.blendingMode = BlendModes.MULTIPLY;
+          }
+          break;
+        default:
+          // Ignore any other properties for now
+          // But maybe log them?
+          // alert('Unknown property ' + pName + ' with value ' + val + ' on element ' + myE.name); 
 			}
 		}
 	}

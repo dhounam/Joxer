@@ -116,10 +116,11 @@ var c_layerColourLookup = {
 // In addition, the following colours are defined in Sibyl for responsive
 // DCs. They have no CMYK values here, since they go through as unconverted
 // RGB
-// dc-blue1, dc-blue2, dc-bluetext, dc-bluedark, dc-red1, dc-redtext, dc-yellow,
-// dc-purple1, dc-purple2, dc-green1, dc-green2, dc-printbkgd, dc-highlight,
-// dc-numberbox, dc-gridlines, dc-greybox, dc-greytext, dc-socmedbkgd
-// dc-stone, dc-stonetext
+// dc-econred,dc-econred60,dc-econredtint,dc-econreddark,
+// dc-chicago30,dc-chicago55,dc-chartchicago,
+// dc-chartblue,dc-land3,dc-land4,dc-landtext,
+// dc-london5,dc-london20,dc-london30,dc-london55,dc-london70,dc-london85,
+// dc-gridlines,dc-greytext,dc-highlight,dc-socmedbkgd
 // And the following for films
 // films-bkgd, films-greytext, films-axis-greytext, films-gridlines
 // Hex values for all these are in the Sibyl colours lookup file

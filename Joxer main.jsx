@@ -411,7 +411,7 @@ function setColourSpace(openDoc) {
     app.executeMenuCommand('doc-color-cmyk');
     g_colourSpaceRgb = false;
   }
-  // Strip rgb/cmyk flag from main group name
+  // RGB or CMYK, main group has consistent name
   mainGrp.name = 'main-group';
 }
 // SET COLOUR SPACE ends
@@ -431,7 +431,9 @@ function openSVG() {
 	if(canOpenFile) {
     // If we selected a file, open it...
     // Default is RGB colour space
-		myDoc = app.open(myFile, DocumentColorSpace.RGB);
+    while (typeof myDoc !== 'object') {
+      myDoc = app.open(myFile, DocumentColorSpace.RGB);
+    }
     g_colourSpaceRgb = true;
 		// ...but may (usually) reset colourspace to CMYK
     setColourSpace(myDoc);
